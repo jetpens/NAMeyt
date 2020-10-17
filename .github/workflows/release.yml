@@ -28,4 +28,9 @@ jobs:
         working-directory: android
 
       - name: Android SDK path setup
-    
+        run: bash .scripts/android-sdk.sh
+
+      - name: Write Cert
+        run: bash .scripts/write-cert.sh
+        env:
+      
