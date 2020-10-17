@@ -20,4 +20,7 @@ jobs:
           cache-disabled: true
           gradle-version: 7.6
 
-      - name: Build toplev
+      - name: Build toplevel project
+        run: gradle build buildPlugin updateAndroidProperties dump-ci-helper-cli --info
+
+      - name: Build andro
