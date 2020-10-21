@@ -36,4 +36,8 @@ jobs:
           CERT_CERTFILE: ${{ secrets.CERT_CERTFILE }}
           CERT_KEYFILE: ${{  secrets.CERT_KEYFILE  }}
 
- 
+      - name: Resign apks
+        run: bash .scripts/ci-dummy-sign.sh
+
+      - name: Upload assets to release
+      
