@@ -40,4 +40,7 @@ jobs:
         run: bash .scripts/ci-dummy-sign.sh
 
       - name: Upload assets to release
-      
+        run: sh .scripts/ci-helper.sh uploadAssets
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          UPLOAD_URL: ${{ g
