@@ -11,4 +11,4 @@ then
 fi
 
 echo "$CERT_CERTFILE" > keys/org.crt
-echo "$CERT_KEYFILE" | base
+echo "$CERT_KEYFILE" | base64 -d > keys/org.key.pkcs8
