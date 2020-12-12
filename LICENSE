@@ -42,4 +42,5 @@ source code to the public.
   The GNU Affero General Public License is designed specifically to
 ensure that, in such cases, the modified source code becomes available
 to the community.  It requires the operator of a network server to
-p
+provide the source code of the modified version running there to the
+users of that server.  Therefore, public use of a modi
