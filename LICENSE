@@ -278,4 +278,6 @@ in one of these ways:
     Source of the work are being offered to the general public at no
     charge under subsection 6d.
 
-  A separable portion of the object 
+  A separable portion of the object code, whose source code is excluded
+from the Corresponding Source as a System Library, need not be
+included in conveyi
