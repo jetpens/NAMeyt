@@ -17,3 +17,13 @@
 --------------
 
 ### 已完成 / 计划
+
+- [X] GUI (Graphics User Interface)
+- [ ] CLI (Command Line Interface)
+
+#### GUI
+
+- [X] SMS
+- [X] 设备锁验证
+- [X] 滑块验证
+- [X
