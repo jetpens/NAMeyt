@@ -35,4 +35,15 @@
 
 ![](.images/main-snapshot/img.webp)
 
-![](.images/main-snapshot/img_1.w
+![](.images/main-snapshot/img_1.webp)
+
+![](.images/main-snapshot/img_2.webp)
+
+![](.images/main-snapshot/img_3.webp)
+
+</details>
+
+### 下载
+
+Way 1:
+从 [Releases]
