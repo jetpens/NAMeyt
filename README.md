@@ -26,4 +26,13 @@
 - [X] SMS
 - [X] 设备锁验证
 - [X] 滑块验证
-- [X
+- [X] Pic 4code 验证
+
+###### 预览
+
+<details>
+<summary>点击展开</summary>
+
+![](.images/main-snapshot/img.webp)
+
+![](.images/main-snapshot/img_1.w
