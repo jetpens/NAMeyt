@@ -57,4 +57,10 @@ Way 2: 从最新构建下载
 <details>
 <summary>点击展开</summary>
 
-![](.images/downlo
+![](.images/download-from-ci/img.webp)
+
+![](.images/download-from-ci/img_1.webp)
+
+![](.images/download-from-ci/img_2.webp)
+
+下载的压缩包里有全部的最
