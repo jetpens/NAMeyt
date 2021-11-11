@@ -49,4 +49,12 @@ Way 1:
 从 [Releases](https://github.com/KasukuSakura/mirai-login-solver-sakura/releases)
 下载
 
-- `mirai-login-solver-sakura-XXX.mirai2.jar` ->
+- `mirai-login-solver-sakura-XXX.mirai2.jar` -> mirai-console 插件
+- `apk-release.apk` 安卓应用程序
+
+Way 2: 从最新构建下载
+
+<details>
+<summary>点击展开</summary>
+
+![](.images/downlo
