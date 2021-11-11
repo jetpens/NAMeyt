@@ -46,4 +46,7 @@
 ### 下载
 
 Way 1:
-从 [Releases]
+从 [Releases](https://github.com/KasukuSakura/mirai-login-solver-sakura/releases)
+下载
+
+- `mirai-login-solver-sakura-XXX.mirai2.jar` ->
