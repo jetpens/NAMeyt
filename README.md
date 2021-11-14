@@ -63,4 +63,13 @@ Way 2: 从最新构建下载
 
 ![](.images/download-from-ci/img_2.webp)
 
-下载的压缩包里有全部的最
+下载的压缩包里有全部的最新构建成果
+
+</details>
+
+
+## 配置
+
+mirai-login-solver-sakura 配置通过 jvm 参数指定
+
+| property                  | default | accepts 
