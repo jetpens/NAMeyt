@@ -72,4 +72,5 @@ Way 2: 从最新构建下载
 
 mirai-login-solver-sakura 配置通过 jvm 参数指定
 
-| property                  | default | accepts 
+| property                  | default | accepts    | desc                             |
+|:--------------------------|:--------|:-----------|:-----------
