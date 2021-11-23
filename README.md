@@ -73,4 +73,6 @@ Way 2: 从最新构建下载
 mirai-login-solver-sakura 配置通过 jvm 参数指定
 
 | property                  | default | accepts    | desc                             |
-|:--------------------------|:--------|:-----------|:-----------
+|:--------------------------|:--------|:-----------|:---------------------------------|
+| mlss.no-tunnel            | false   | true/false | 是否禁用 tunnel                      |
+| mlss.po
