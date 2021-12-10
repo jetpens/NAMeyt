@@ -81,4 +81,7 @@ mirai-login-solver-sakura 配置通过 jvm 参数指定
 ## Q & A
 
 > Q: 扫码后崩溃 <br/>
-> A: 更新 `Android W
+> A: 更新 `Android WebView`, 具体方法请百度 `Android 更新 WebView`
+
+> Q: 怎么在服务器上验证 <br/>
+> A: 使用命令行模式 (添加 jvm 参数 `-Dmirai.no-desktop=t
