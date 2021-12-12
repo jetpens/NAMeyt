@@ -84,4 +84,17 @@ mirai-login-solver-sakura 配置通过 jvm 参数指定
 > A: 更新 `Android WebView`, 具体方法请百度 `Android 更新 WebView`
 
 > Q: 怎么在服务器上验证 <br/>
-> A: 使用命令行模式 (添加 jvm 参数 `-Dmirai.no-desktop=t
+> A: 使用命令行模式 (添加 jvm 参数 `-Dmirai.no-desktop=true`)
+
+---------
+
+> 以下内容只适合需要对接 mirai-login-solver-sakura 的开发者参考
+## 数据交换
+
+### `<QR CODE>`
+
+显示给 APP 扫描的二维码内容是一个 json, 格式如下
+
+```json5
+{
+    "p
