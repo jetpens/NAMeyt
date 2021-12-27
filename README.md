@@ -102,4 +102,13 @@ mirai-login-solver-sakura 配置通过 jvm 参数指定
         "192.168.2.123",
         "192.168.5.148",
     ],
-    "id
+    "id": "AAAAAAAAAAAAAAA", // 本次请求的 id
+}
+```
+
+### `/request/request/$id`
+
+```json5
+{
+    "reqid": "AAAAAAAAAAAAAA", // 请求的 id  (not in use)
+ 
