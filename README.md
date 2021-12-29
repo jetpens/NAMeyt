@@ -111,4 +111,5 @@ mirai-login-solver-sakura 配置通过 jvm 参数指定
 ```json5
 {
     "reqid": "AAAAAAAAAAAAAA", // 请求的 id  (not in use)
- 
+    "rspuri": "/request/complete/AAAAAAAAAAAAAA", // 回调, 只有 path, POST 请求, 无编码
+    "create-time": 10086, // 时间戳, ms      (not
