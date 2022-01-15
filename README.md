@@ -112,4 +112,10 @@ mirai-login-solver-sakura 配置通过 jvm 参数指定
 {
     "reqid": "AAAAAAAAAAAAAA", // 请求的 id  (not in use)
     "rspuri": "/request/complete/AAAAAAAAAAAAAA", // 回调, 只有 path, POST 请求, 无编码
-    "create-time": 10086, // 时间戳, ms      (not
+    "create-time": 10086, // 时间戳, ms      (not in use)
+    "data": { // 请求的数据体
+        "type": "slider", // 这次请求的类型
+        //..... 请求的其他数据
+    },
+
+    // 代理地址, 可选 (可不提供), 占位符 <serve
