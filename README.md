@@ -118,4 +118,9 @@ mirai-login-solver-sakura 配置通过 jvm 参数指定
         //..... 请求的其他数据
     },
 
-    // 代理地址, 可选 (可不提供), 占位符 <serve
+    // 代理地址, 可选 (可不提供), 占位符 <serverip> 会自动替换为合适的地址, 支持 socks5 和 http proxy
+    "tunnel": "socks://<serverip>:1234", // Optional
+}
+```
+
+#### `sli
