@@ -123,4 +123,12 @@ mirai-login-solver-sakura 配置通过 jvm 参数指定
 }
 ```
 
-#### `sli
+#### `slider`
+
+REQ
+
+```json5
+{
+    "data": {
+        "type": "slider",
+        "url": "https://ssl.captcha.qq.com/templa
