@@ -131,4 +131,15 @@ REQ
 {
     "data": {
         "type": "slider",
-        "url": "https://ssl.captcha.qq.com/templa
+        "url": "https://ssl.captcha.qq.com/template/wireless_mqq_captcha.html?style=simple&aid=16&uin=.....",
+    }
+}
+```
+
+RSP:
+
+```text
+t105.............
+```
+
+#### `b
