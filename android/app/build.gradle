@@ -8,4 +8,7 @@ android {
     compileSdk 32
 
     defaultConfig {
-        applicationId "com.ka
+        applicationId "com.kasukusakura.sakuraloginsolver"
+        minSdk 27
+        targetSdk 32
+        versionCode Integer.parseInt(property("proj.p
