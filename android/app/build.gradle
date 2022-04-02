@@ -14,4 +14,6 @@ android {
         versionCode Integer.parseInt(property("proj.projvernum"))
         versionName property("proj.projver")
 
-        testInstrumentationRunner "androidx.test.
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField("String", "COMMIT_ID", "\"" + project.property("proj.commitid") + "\""
