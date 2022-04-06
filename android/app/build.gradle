@@ -16,4 +16,10 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
-        buildConfigField("String", "COMMIT_ID", "\"" + project.property("proj.commitid") + "\""
+        buildConfigField("String", "COMMIT_ID", "\"" + project.property("proj.commitid") + "\"")
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultPr
