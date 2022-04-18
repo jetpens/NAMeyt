@@ -30,4 +30,7 @@ android {
         }
 
         debug {
-            a
+            applicationIdSuffix '.debug'
+            manifestPlaceholders = [
+                    build_type: ' (Debug)',
+         
