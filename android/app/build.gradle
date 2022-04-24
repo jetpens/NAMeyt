@@ -33,4 +33,9 @@ android {
             applicationIdSuffix '.debug'
             manifestPlaceholders = [
                     build_type: ' (Debug)',
-         
+            ]
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targ
