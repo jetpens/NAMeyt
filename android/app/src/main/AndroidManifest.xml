@@ -10,4 +10,6 @@
             android:dataExtractionRules="@xml/data_extraction_rules"
             android:fullBackupContent="@xml/backup_rules"
             android:icon="@mipmap/ic_launcher"
-            android:label="Sakura Login Solver ${
+            android:label="Sakura Login Solver ${build_type}"
+            android:roundIcon="@mipmap/ic_launcher_round"
+            android:supportsRtl="tr
