@@ -21,4 +21,6 @@
                 android:exported="false">
         </activity>
         <activity
-                android:name=".Mai
+                android:name=".MainActivity"
+                android:exported="true"
+                android:theme="@style/
