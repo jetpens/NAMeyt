@@ -23,4 +23,7 @@
         <activity
                 android:name=".MainActivity"
                 android:exported="true"
-                android:theme="@style/
+                android:theme="@style/Theme.SakuraLoginSolver.NoActionBar">
+            <meta-data
+                    android:name="android.app.lib_name"
+      
