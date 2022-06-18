@@ -26,4 +26,7 @@
                 android:theme="@style/Theme.SakuraLoginSolver.NoActionBar">
             <meta-data
                     android:name="android.app.lib_name"
-      
+                    android:value=""/>
+
+            <intent-filter>
+                <action android:name="android.intent
