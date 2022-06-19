@@ -9,4 +9,6 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.appcompat.app.AppCompatActivity
 import androidx.webkit.ProxyConfig
-import 
+import androidx.webkit.ProxyController
+import com.google.gson.JsonParser
+import com.kasukusakura.sakuraloginsolver.data
