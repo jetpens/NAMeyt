@@ -15,4 +15,7 @@ import com.kasukusakura.sakuraloginsolver.databinding.ActivityCaptchaBinding
 import java.util.concurrent.Executor
 
 class CaptchaActivity : AppCompatActivity() {
-    priv
+    private lateinit var binding: ActivityCaptchaBinding
+
+    private val dummyExecutor = Executor {}
+    private v
