@@ -11,4 +11,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.webkit.ProxyConfig
 import androidx.webkit.ProxyController
 import com.google.gson.JsonParser
-import com.kasukusakura.sakuraloginsolver.data
+import com.kasukusakura.sakuraloginsolver.databinding.ActivityCaptchaBinding
+import java.util.concurrent.Executor
+
+class CaptchaActivity : AppCompatActivity() {
+    priv
