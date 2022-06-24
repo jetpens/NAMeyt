@@ -18,4 +18,7 @@ class CaptchaActivity : AppCompatActivity() {
     private lateinit var binding: ActivityCaptchaBinding
 
     private val dummyExecutor = Executor {}
-    private v
+    private val dummyListener = Runnable {}
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(save
