@@ -24,4 +24,8 @@ class CaptchaActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         binding = ActivityCaptchaBinding.inflate(layoutInflater)
-        setContentView(binding.
+        setContentView(binding.root)
+
+        val webview = binding.webview
+        webview.webViewClient = object : WebViewClient() {
+         
