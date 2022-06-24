@@ -21,4 +21,7 @@ class CaptchaActivity : AppCompatActivity() {
     private val dummyListener = Runnable {}
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(save
+        super.onCreate(savedInstanceState)
+
+        binding = ActivityCaptchaBinding.inflate(layoutInflater)
+        setContentView(binding.
