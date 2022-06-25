@@ -28,4 +28,7 @@ class CaptchaActivity : AppCompatActivity() {
 
         val webview = binding.webview
         webview.webViewClient = object : WebViewClient() {
-         
+            override fun shouldOverrideUrlLoading(
+                view: WebView?,
+                request: WebResourceRequest
+            
