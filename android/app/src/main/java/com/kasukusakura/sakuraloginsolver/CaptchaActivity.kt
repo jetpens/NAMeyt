@@ -38,4 +38,6 @@ class CaptchaActivity : AppCompatActivity() {
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
 
-                if (!intent.hasExtra("r
+                if (!intent.hasExtra("raw-direct")) return
+
+                webview.evaluateJavascript("document.body.textContent") { rspx ->
