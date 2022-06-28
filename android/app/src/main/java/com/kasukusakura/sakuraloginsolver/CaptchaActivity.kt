@@ -31,4 +31,8 @@ class CaptchaActivity : AppCompatActivity() {
             override fun shouldOverrideUrlLoading(
                 view: WebView?,
                 request: WebResourceRequest
-            
+            ): Boolean {
+                return onJsBridgeInvoke(request.url)
+            }
+
+            override fun onPageFinished
