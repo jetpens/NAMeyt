@@ -35,4 +35,7 @@ class CaptchaActivity : AppCompatActivity() {
                 return onJsBridgeInvoke(request.url)
             }
 
-            override fun onPageFinished
+            override fun onPageFinished(view: WebView?, url: String?) {
+                super.onPageFinished(view, url)
+
+                if (!intent.hasExtra("r
