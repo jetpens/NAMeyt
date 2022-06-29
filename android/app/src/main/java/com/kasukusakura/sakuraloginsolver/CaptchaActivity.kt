@@ -46,3 +46,6 @@ class CaptchaActivity : AppCompatActivity() {
                         if (roxitx.isJsonPrimitive) {
                             roxitx.asString
                         } else {
+                            rspx
+                        }.also { JsonParser.parseString(it).asJsonObject }
+             
