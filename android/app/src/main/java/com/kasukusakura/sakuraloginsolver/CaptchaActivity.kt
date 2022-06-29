@@ -43,4 +43,6 @@ class CaptchaActivity : AppCompatActivity() {
                 webview.evaluateJavascript("document.body.textContent") { rspx ->
                     kotlin.runCatching {
                         val roxitx = JsonParser.parseString(rspx)
-                  
+                        if (roxitx.isJsonPrimitive) {
+                            roxitx.asString
+                        } else {
