@@ -41,3 +41,6 @@ class CaptchaActivity : AppCompatActivity() {
                 if (!intent.hasExtra("raw-direct")) return
 
                 webview.evaluateJavascript("document.body.textContent") { rspx ->
+                    kotlin.runCatching {
+                        val roxitx = JsonParser.parseString(rspx)
+                  
