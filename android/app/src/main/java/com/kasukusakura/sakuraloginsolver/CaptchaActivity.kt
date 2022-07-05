@@ -50,4 +50,9 @@ class CaptchaActivity : AppCompatActivity() {
                         }.also { JsonParser.parseString(it).asJsonObject }
                     }.onSuccess { erx ->
                         val intent = Intent()
-                            .putExtras(int
+                            .putExtras(intent)
+                            .putExtra("srsp", erx)
+
+
+                        setResult(RESULT_OK, intent)
+    
