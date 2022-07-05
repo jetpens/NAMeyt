@@ -55,4 +55,9 @@ class CaptchaActivity : AppCompatActivity() {
 
 
                         setResult(RESULT_OK, intent)
-    
+                        finish()
+                    }
+                }
+            }
+        }
+        WebView.setWebContentsDebuggingEn
