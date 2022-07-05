@@ -60,4 +60,7 @@ class CaptchaActivity : AppCompatActivity() {
                 }
             }
         }
-        WebView.setWebContentsDebuggingEn
+        WebView.setWebContentsDebuggingEnabled(true)
+        webview.settings.apply {
+            javaScriptEnabled = true
+            domStorageEnabled = 
