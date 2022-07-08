@@ -68,3 +68,4 @@ class CaptchaActivity : AppCompatActivity() {
 
         val tunnel = intent.getStringExtra("tunnel").orEmpty()
         try {
+            ProxyController.getInstance().clearProxyOverride(dummyExecutor, dummyListener
