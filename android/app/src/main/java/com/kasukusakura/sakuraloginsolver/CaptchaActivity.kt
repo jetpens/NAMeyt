@@ -63,4 +63,8 @@ class CaptchaActivity : AppCompatActivity() {
         WebView.setWebContentsDebuggingEnabled(true)
         webview.settings.apply {
             javaScriptEnabled = true
-            domStorageEnabled = 
+            domStorageEnabled = true
+        }
+
+        val tunnel = intent.getStringExtra("tunnel").orEmpty()
+        try {
