@@ -82,4 +82,6 @@ class CaptchaActivity : AppCompatActivity() {
                 ProxyController.getInstance().clearProxyOverride(dummyExecutor, dummyListener)
             }
 
-            in
+            intent.getStringExtra("url")?.let { webview.loadUrl(it) }
+        } catch (e: Throwable) {
+            
