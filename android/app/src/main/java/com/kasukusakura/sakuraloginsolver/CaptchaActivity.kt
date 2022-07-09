@@ -79,4 +79,7 @@ class CaptchaActivity : AppCompatActivity() {
 
                 ProxyController.getInstance().setProxyOverride(conf, dummyExecutor, dummyListener)
             } else {
-                ProxyCo
+                ProxyController.getInstance().clearProxyOverride(dummyExecutor, dummyListener)
+            }
+
+            in
