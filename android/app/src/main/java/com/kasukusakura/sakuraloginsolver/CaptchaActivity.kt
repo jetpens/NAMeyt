@@ -73,4 +73,8 @@ class CaptchaActivity : AppCompatActivity() {
             if (tunnel.isNotBlank()) {
 
                 val conf = ProxyConfig.Builder()
-        
+                    .addProxyRule(tunnel)
+                    .addDirect()
+                    .build()
+
+                ProxyCon
