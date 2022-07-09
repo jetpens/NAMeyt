@@ -77,4 +77,6 @@ class CaptchaActivity : AppCompatActivity() {
                     .addDirect()
                     .build()
 
-                ProxyCon
+                ProxyController.getInstance().setProxyOverride(conf, dummyExecutor, dummyListener)
+            } else {
+                ProxyCo
