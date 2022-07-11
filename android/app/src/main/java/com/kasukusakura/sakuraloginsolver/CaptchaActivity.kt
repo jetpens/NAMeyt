@@ -84,4 +84,5 @@ class CaptchaActivity : AppCompatActivity() {
 
             intent.getStringExtra("url")?.let { webview.loadUrl(it) }
         } catch (e: Throwable) {
-            
+            webview.loadData(
+                "Failed to load webview. Try updating Android WebView:\n\n" + e.stackTraceToString()
