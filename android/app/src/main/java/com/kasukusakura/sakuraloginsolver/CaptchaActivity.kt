@@ -85,4 +85,13 @@ class CaptchaActivity : AppCompatActivity() {
             intent.getStringExtra("url")?.let { webview.loadUrl(it) }
         } catch (e: Throwable) {
             webview.loadData(
-                "Failed to load webview. Try updating Android WebView:\n\n" + e.stackTraceToString()
+                "Failed to load webview. Try updating Android WebView:\n\n" + e.stackTraceToString(),
+                "text/plain",
+                "utf-8"
+            )
+        }
+
+    }
+
+
+    private fun onJsBridgeI
