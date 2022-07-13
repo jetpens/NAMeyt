@@ -94,4 +94,6 @@ class CaptchaActivity : AppCompatActivity() {
     }
 
 
-    private fun onJsBridgeI
+    private fun onJsBridgeInvoke(request: Uri): Boolean {
+        if (request.path.equals("/onVerifyCAPTCHA")) {
+            v
