@@ -96,4 +96,6 @@ class CaptchaActivity : AppCompatActivity() {
 
     private fun onJsBridgeInvoke(request: Uri): Boolean {
         if (request.path.equals("/onVerifyCAPTCHA")) {
-            v
+            val p = request.getQueryParameter("p")
+            val jsData = JsonParser.parseString(p).asJsonObject
+   
