@@ -98,4 +98,9 @@ class CaptchaActivity : AppCompatActivity() {
         if (request.path.equals("/onVerifyCAPTCHA")) {
             val p = request.getQueryParameter("p")
             val jsData = JsonParser.parseString(p).asJsonObject
-   
+            authFinish(jsData["ticket"].asString)
+        }
+        return false
+    }
+
+    private fun authFinish(tic
