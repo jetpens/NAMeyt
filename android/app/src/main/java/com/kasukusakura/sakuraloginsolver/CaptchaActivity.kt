@@ -103,4 +103,7 @@ class CaptchaActivity : AppCompatActivity() {
         return false
     }
 
-    private fun authFinish(tic
+    private fun authFinish(ticket: String) {
+        val intent = Intent()
+            .putExtras(this.intent)
+            .putExtra("ticket", t
