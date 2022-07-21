@@ -106,4 +106,7 @@ class CaptchaActivity : AppCompatActivity() {
     private fun authFinish(ticket: String) {
         val intent = Intent()
             .putExtras(this.intent)
-            .putExtra("ticket", t
+            .putExtra("ticket", ticket)
+        try {
+            ProxyController.getInstance().clearProxyOverride(dummyExecutor, dummyListener)
+        } 
