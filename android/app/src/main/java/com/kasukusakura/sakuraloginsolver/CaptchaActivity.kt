@@ -109,4 +109,9 @@ class CaptchaActivity : AppCompatActivity() {
             .putExtra("ticket", ticket)
         try {
             ProxyController.getInstance().clearProxyOverride(dummyExecutor, dummyListener)
-        } 
+        } catch (_: Throwable) {
+        }
+        binding.webview.destroy()
+
+        setResult(RESULT_OK, intent)
+     
