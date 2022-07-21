@@ -114,4 +114,10 @@ class CaptchaActivity : AppCompatActivity() {
         binding.webview.destroy()
 
         setResult(RESULT_OK, intent)
-     
+        finish()
+    }
+
+    override fun onDestroy() {
+        binding.webview.destroy()
+        try {
+            ProxyContr
