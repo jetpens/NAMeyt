@@ -87,3 +87,104 @@ class FirstFragment : Fragment() {
             binding.urlOrId.text.clear()
         }
         binding.next.setOnClickListener {
+            process(binding.urlOrId.text.toString())
+        }
+        binding.qrScan.setOnClickListener {
+            qrScanLauncher.launch(Intent(requireActivity(), CaptureActivity::class.java))
+        }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+        _client?.let { c ->
+            c.dispatcher.cancelAll()
+            c.connectionPool.evictAll()
+            c.cache?.close()
+        }
+    }
+
+    private class ReqContext(
+        var processAlert: AlertDialog,
+        val activity: Activity,
+    ) {
+        var complete: ((Intent) -> Unit)? = null
+    }
+
+    @Suppress("DEPRECATION")
+    private fun submitBack(rspUrl: String, ticket: String) {
+        submitBack(rspUrl, RequestBody.create(null, ticket))
+    }
+
+    private fun submitBack(rspUrl: String, rspbdy: RequestBody) {
+
+        val activity = requireActivity()
+        val alert = AlertDialog.Builder(activity)
+            .setTitle("请稍后").setMessage("正在提交").setCancelable(false)
+            .create()
+        activity.runOnUiThread { alert.show() }
+
+        client.newCall(
+            Request.Builder().url(rspUrl).post(rspbdy).build()
+        ).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                activity.runOnUiThread {
+                    alert.dismiss()
+                    Toast.makeText(activity, e.message, Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                activity.runOnUiThread {
+                    alert.dismiss()
+                    Toast.makeText(
+                        activity,
+                        "Done.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+        })
+    }
+
+    private fun processSakuraRequest(context: ReqContext, toplevel: JsonObject) {
+        val sport = toplevel["port"].asInt
+        val reqId = toplevel["id"].asString
+        val servers = toplevel["server"].asJsonArray
+
+        fun processNext(iter: Iterator<JsonElement>) {
+            if (!iter.hasNext()) {
+                context.activity.runOnUiThread {
+                    context.processAlert.cancel()
+                    Toast.makeText(requireActivity(), "No any server available....", Toast.LENGTH_SHORT).show()
+                }
+                return
+            }
+
+            val serverIp = iter.next().asString
+            val serverBase = "http://$serverIp:$sport"
+
+            val urlx = "$serverBase/request/request/$reqId"
+            context.processAlert.setMessage("Trying $urlx".also { Log.i(LOG_NAME, it) })
+
+            client.newCall(
+                Request.Builder()
+                    .url(urlx)
+                    .get()
+                    .build()
+            ).also { call ->
+                if (InetAddress.getByName(serverIp).isSiteLocalAddress) {
+                    call.timeout().timeout(3, TimeUnit.SECONDS)
+                }
+            }.enqueue(object : Callback {
+                override fun onFailure(call: Call, e: IOException) {
+                    Log.e(LOG_NAME, "Net error", e)
+                    processNext(iter)
+                }
+
+                override fun onResponse(call: Call, response: Response) {
+                    val bdy = response.body
+                    if (bdy == null || response.code != 200) {
+                        processNext(iter)
+                        return
+                    }
