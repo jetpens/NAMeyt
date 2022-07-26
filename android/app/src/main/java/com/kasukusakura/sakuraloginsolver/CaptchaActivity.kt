@@ -123,4 +123,6 @@ class CaptchaActivity : AppCompatActivity() {
             ProxyController.getInstance().clearProxyOverride(dummyExecutor, dummyListener)
         } catch (_: Throwable) {
         }
-       
+        super.onDestroy()
+    }
+}
