@@ -188,3 +188,129 @@ class FirstFragment : Fragment() {
                         processNext(iter)
                         return
                     }
+
+                    val strx = bdy.string()
+                    Log.i(LOG_NAME, strx)
+                    processSakuraRequest2(context, serverIp, serverBase, strx)
+                }
+            })
+        }
+
+        processNext(servers.iterator())
+
+    }
+
+    private fun processSakuraRequest2(context: ReqContext, serverIp: String, serverBase: String, rawdata: String) {
+        val toplevel = JsonParser.parseString(rawdata).asJsonObject
+
+        val msgdata = toplevel["data"].asJsonObject
+        crtContext = context
+        val rspUrl = URI.create(serverBase).resolve(toplevel["rspuri"].asString).toString()
+
+        val tunnel = toplevel["tunnel"]?.asString.orEmpty()
+            .replace("<serverip>", serverIp)
+
+        context.complete = { rspx ->
+            val ticket = rspx.getStringExtra("ticket")!!
+
+            submitBack(rspUrl, ticket)
+        }
+
+        when (msgdata["type"].asString) {
+            "slider" -> {
+                rawRequestLauncher.launch(
+                    Intent(requireActivity(), CaptchaActivity::class.java)
+                        .putExtra("url", msgdata["url"].asString)
+                        .putExtra("tunnel", tunnel)
+                )
+            }
+            "browser" -> {
+                context.complete = {}
+                context.processAlert.dismiss()
+                openQQ(msgdata["url"].asString)
+            }
+            else -> {
+                requireActivity().runOnUiThread {
+                    context.processAlert.cancel()
+                    Toast.makeText(
+                        requireActivity(),
+                        "不支持的类型 " + msgdata["type"].asString + ", 请尝试更新",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+                return
+            }
+        }
+    }
+
+    private fun processAsOnlineCode(context: ReqContext, reqcode: Int) {
+        val remoteUrl = LEGACY_ONLINE_SERVICE + reqcode
+
+        client.newCall(
+            Request.Builder().url(remoteUrl).get().build()
+        ).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                requireActivity().runOnUiThread {
+                    context.processAlert.cancel()
+                    Toast.makeText(requireActivity(), e.message, Toast.LENGTH_SHORT).show()
+                }
+
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                requireActivity().runOnUiThread {
+                    if (response.code == 200) {
+                        val url = response.body!!.string()
+
+                        crtContext = context
+                        crtContext.complete = { rspx ->
+                            val ticket = rspx.getStringExtra("ticket")!!
+                            Log.i(LOG_NAME, "Response ticket: $ticket")
+                            submitBack(
+                                "$LEGACY_ONLINE_SERVICE/finish/$reqcode",
+                                FormBody.Builder().add("ticket", ticket).build()
+                            )
+                        }
+
+                        rawRequestLauncher.launch(
+                            Intent(requireActivity(), CaptchaActivity::class.java)
+                                .putExtra("url", url)
+                        )
+                    } else {
+                        context.processAlert.cancel()
+                        Toast.makeText(
+                            requireActivity(),
+                            "请求错误：" + response.code,
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+            }
+        })
+    }
+
+
+    private fun processAsRawRequest(context: ReqContext, url_: String) {
+        val url = when {
+            url_.startsWith("http") -> url_
+            else -> "http://$url_"
+        }
+
+        crtContext = context
+        context.complete = fun(rsp) {
+            if (rsp.hasExtra("srsp")) {
+                requireActivity().runOnUiThread {
+                    context.processAlert.show()
+                }
+                val srsp = rsp.getStringExtra("srsp")!!
+                Log.i(LOG_NAME, srsp)
+                val urix = URI.create(url)
+                processSakuraRequest2(context, urix.host, "${urix.scheme}://${urix.host}:${urix.port}", srsp)
+                return
+            }
+
+            val ticket = rsp.getStringExtra("ticket")!!
+            Log.i(LOG_NAME, "Response ticket: $ticket")
+
+            requireActivity().runOnUiThread {
+                AlertDialog.Builder(requireActivity()).setTitle("Ticket").setMessage(ticket).setPositiveButton(
