@@ -314,3 +314,68 @@ class FirstFragment : Fragment() {
 
             requireActivity().runOnUiThread {
                 AlertDialog.Builder(requireActivity()).setTitle("Ticket").setMessage(ticket).setPositiveButton(
+                    "复制"
+                ) { _, _ ->  // dialog, which
+                    val clipboardManager =
+                        requireActivity().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                    val result = ClipData.newPlainText(null, ticket)
+                    clipboardManager.setPrimaryClip(result)
+                    Toast.makeText(requireActivity(), "复制成功", Toast.LENGTH_SHORT).show()
+                }.show()
+            }
+
+        }
+        rawRequestLauncher.launch(
+            Intent(requireActivity(), CaptchaActivity::class.java)
+                .putExtra("url", url)
+                .putExtra("raw-direct", true)
+        )
+    }
+
+    private fun process(data: String) {
+        val context = ReqContext(
+            processAlert = AlertDialog.Builder(requireActivity())
+                .setTitle("Processing...")
+                .setMessage("Please wait...")
+                .setCancelable(false)
+                .create(),
+            activity = requireActivity()
+        )
+        context.activity.runOnUiThread {
+            context.processAlert.show()
+        }
+
+        kotlin.runCatching {
+            JsonParser.parseString(data).asJsonObject
+        }.onSuccess {
+            processSakuraRequest(context, it)
+            return
+        }
+
+        val reqcode = try {
+            data.toInt()
+        } catch (_: java.lang.Exception) {
+            -1
+        }
+        if (reqcode > 0) {
+            processAsOnlineCode(context, reqcode)
+        } else {
+            processAsRawRequest(context, data)
+        }
+    }
+
+    private fun openQQ(url: String) {
+        val intent = Intent()
+        intent.action = "android.intent.action.VIEW"
+        intent.putExtra("url", url)
+        intent.data = Uri.parse("mqqverifycode://puzzle_verify_code/PUZZLEVERIFYCODE")
+        intent.putExtra("business", 2097152L)
+        intent.putExtra("hide_operation_bar", true)
+        intent.putExtra("hide_more_button", true)
+        intent.putExtra("isSubaccount", true)
+        intent.putExtra("isShowAd", false)
+        kotlin.runCatching {
+            startActivity(intent)
+        }.onFailure { Log.w("SakuraLoginSolver", it) }
+    }
+}
