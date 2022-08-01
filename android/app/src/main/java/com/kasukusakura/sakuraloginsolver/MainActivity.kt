@@ -9,4 +9,7 @@ import com.kasukusakura.sakuraloginsolver.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var 
+    private lateinit var appBarConfiguration: AppBarConfiguration
+    private lateinit var binding: ActivityMainBinding
+
+    override fun onCreate(savedInsta
