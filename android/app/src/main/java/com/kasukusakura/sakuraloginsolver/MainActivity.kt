@@ -20,4 +20,6 @@ class MainActivity : AppCompatActivity() {
 
         setSupportActionBar(binding.toolbar)
 
-        binding.rightLeft.text = "Version: " + BuildConfig.
+        binding.rightLeft.text = "Version: " + BuildConfig.VERSION_NAME + "\nCommit: " + BuildConfig.COMMIT_ID
+    }
+}
