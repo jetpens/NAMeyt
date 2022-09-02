@@ -20,4 +20,7 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <include android:id="@+id/include" layout
+    <include android:id="@+id/include" layout="@layout/content_main"/>
+    <TextView
+            android:id="@+id/right_left"
+            android:
