@@ -27,4 +27,4 @@
             android:layout_height="wrap_content" android:alpha="0.5" android:text="TextView"
             app:layout_anchor="@+id/include" app:layout_anchorGravity="end|bottom"/>
 
-</androidx.coordinatorlayout.widget.C
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
