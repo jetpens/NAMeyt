@@ -7,4 +7,7 @@
                                                    tools:context=".FirstFragment">
     <EditText
             android:id="@+id/url_or_id"
-            android:layout_width="305dp
+            android:layout_width="305dp"
+            android:layout_height="53dp"
+            android:layout_marginTop="56dp" android:ems="10"
+   
