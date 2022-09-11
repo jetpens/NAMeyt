@@ -11,4 +11,7 @@
             android:layout_height="53dp"
             android:layout_marginTop="56dp" android:ems="10"
             android:hint="请求码或请求地址"
-            android:inputType="textPersonName" app:layout_constraintEnd_toEndOf
+            android:inputType="textPersonName" app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent"/>
+    <Button
+      
