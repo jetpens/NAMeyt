@@ -18,4 +18,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="重置"
-            app:layout_constraintStart_toStartOf="@+id
+            app:layout_constraintStart_toStartOf="@+id/url_or_id"
+            app:layout_constraintTop_toBottomOf="@+id/group"/>
+    <Button
+            android:id="@
