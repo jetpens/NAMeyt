@@ -16,4 +16,6 @@
     <Button
             android:id="@+id/reset"
             android:layout_width="wrap_content"
-            android
+            android:layout_height="wrap_content"
+            android:text="重置"
+            app:layout_constraintStart_toStartOf="@+id
