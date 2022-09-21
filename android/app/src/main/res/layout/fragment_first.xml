@@ -25,4 +25,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" android:text="下一步"
             app:layout_constraintEnd_toEndOf="@+id/url_or_id"
-            app:layout_constraintTop_toBotto
+            app:layout_constraintTop_toBottomOf="@+id/group"/>
+    <androidx.constraintlayout.widget.Group
+            android:id="@+id/group
