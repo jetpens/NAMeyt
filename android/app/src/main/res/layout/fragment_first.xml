@@ -32,4 +32,6 @@
             android:layout_height="27dp" android:layout_marginTop="30dp"
             app:layout_constraintTop_toBottomOf="@+id/url_or_id" tools:layout_editor_absoluteX="205dp"/>
     <Button
-       
+            android:id="@+id/qr_scan"
+            android:layout_width="wrap_content"
+            android:layout_heigh
