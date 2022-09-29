@@ -38,4 +38,4 @@
             android:text="扫描二维码"
             app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/group"/>
-</
+</androidx.constraintlayout.widget.ConstraintLayout>
