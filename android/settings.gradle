@@ -2,4 +2,8 @@ pluginManagement {
     repositories {
         gradlePluginPortal()
         google()
-        mave
+        mavenCentral()
+    }
+}
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON
