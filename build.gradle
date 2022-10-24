@@ -2,4 +2,9 @@ import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 
 plugins {
-    id 'o
+    id 'org.jetbrains.kotlin.jvm' version '1.7.10' apply false
+}
+
+allprojects {
+    group 'com.kasukusakura'
+    v
