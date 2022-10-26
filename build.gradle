@@ -15,4 +15,7 @@ allprojects {
 }
 
 ({
-    def process = 
+    def process = new ProcessBuilder("git", "rev-parse", "HEAD")
+            .directory(rootProject.projectDir)
+            .inheritIO()
+          
