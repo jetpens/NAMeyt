@@ -7,4 +7,12 @@ plugins {
 
 allprojects {
     group 'com.kasukusakura'
-    v
+    version project.property('proj.projver')
+
+    repositories {
+        mavenCentral()
+    }
+}
+
+({
+    def process = 
