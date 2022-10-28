@@ -18,4 +18,7 @@ allprojects {
     def process = new ProcessBuilder("git", "rev-parse", "HEAD")
             .directory(rootProject.projectDir)
             .inheritIO()
-          
+            .redirectOutput(ProcessBuilder.Redirect.PIPE)
+            .start()
+    process.waitFor()
+    def commitid = p
