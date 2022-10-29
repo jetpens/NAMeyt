@@ -25,4 +25,6 @@ allprojects {
     rootProject.setProperty("proj.commitid", commitid)
 })()
 
-task
+tasks.create('updateAndroidProperties') {
+    doLast {
+        def apropertieFile = rootProject.file('android/gradle.propertie
