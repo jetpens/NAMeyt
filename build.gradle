@@ -29,4 +29,8 @@ tasks.create('updateAndroidProperties') {
     doLast {
         def apropertieFile = rootProject.file('android/gradle.properties')
         def props = new Properties()
-        try (def reader = Files.newBufferedReader(apropertieFile.toPath(), Sta
+        try (def reader = Files.newBufferedReader(apropertieFile.toPath(), StandardCharsets.UTF_8)) {
+            props.load(reader)
+        }
+
+        rootProject.properti
