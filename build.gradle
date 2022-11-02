@@ -33,4 +33,7 @@ tasks.create('updateAndroidProperties') {
             props.load(reader)
         }
 
-        rootProject.properti
+        rootProject.properties.entrySet().each { entry ->
+            if (entry.key.startsWith("proj.")) {
+                props.setProperty(entry.key, entry.value)
+    
