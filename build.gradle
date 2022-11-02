@@ -36,4 +36,8 @@ tasks.create('updateAndroidProperties') {
         rootProject.properties.entrySet().each { entry ->
             if (entry.key.startsWith("proj.")) {
                 props.setProperty(entry.key, entry.value)
-    
+            }
+        }
+
+        try (def writer = Files.newBufferedWriter(apropertieFile.toPath(), StandardCharsets.UTF_8)) {
+            pr
