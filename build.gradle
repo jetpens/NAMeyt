@@ -40,4 +40,7 @@ tasks.create('updateAndroidProperties') {
         }
 
         try (def writer = Files.newBufferedWriter(apropertieFile.toPath(), StandardCharsets.UTF_8)) {
-            pr
+            props.store(writer, null)
+        }
+    }
+}
