@@ -5,4 +5,11 @@
  * Use of this source code is governed by the GNU AGPLv3 license that can be found through the following link.
  *
  * https://github.com/KasukuSakura/mirai-login-solver-sakura/blob/main/LICENSE
- *
+ */
+
+package cihelper;
+
+import java.io.File;
+import java.net.URI;
+import java.net.URLEncoder;
+import java.n
