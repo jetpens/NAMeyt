@@ -12,4 +12,7 @@ package cihelper;
 import java.io.File;
 import java.net.URI;
 import java.net.URLEncoder;
-import java.n
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.chars
