@@ -18,4 +18,7 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
-@SuppressWarnings({"ConstantConditions", "SwitchStatementWithTooF
+@SuppressWarnings({"ConstantConditions", "SwitchStatementWithTooFewBranches"})
+public class CiHelper {
+    public static void main(String[] args) throws Throwable {
+        System.out.println(Array
