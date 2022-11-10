@@ -21,4 +21,7 @@ import java.util.Arrays;
 @SuppressWarnings({"ConstantConditions", "SwitchStatementWithTooFewBranches"})
 public class CiHelper {
     public static void main(String[] args) throws Throwable {
-        System.out.println(Array
+        System.out.println(Arrays.toString(args));
+        if (args.length == 0) return;
+        var httpc = HttpClient.newHttpClient();
+        var t
