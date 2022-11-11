@@ -24,4 +24,8 @@ public class CiHelper {
         System.out.println(Arrays.toString(args));
         if (args.length == 0) return;
         var httpc = HttpClient.newHttpClient();
-        var t
+        var token = System.getenv("TOKEN");
+
+        switch (args[0]) {
+            case "uploadAssets" -> {
+                var uploadUrl
