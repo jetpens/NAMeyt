@@ -31,4 +31,7 @@ public class CiHelper {
                 var uploadUrl = System.getenv("UPLOAD_URL");
                 uploadUrl = uploadUrl.replaceAll("\\??\\{.*}$", "");
 
-                for (var att : new File("build/outp
+                for (var att : new File("build/output").listFiles()) {
+                    if (att.isDirectory()) continue;
+
+                    var urlxc = 
