@@ -28,4 +28,7 @@ public class CiHelper {
 
         switch (args[0]) {
             case "uploadAssets" -> {
-                var uploadUrl
+                var uploadUrl = System.getenv("UPLOAD_URL");
+                uploadUrl = uploadUrl.replaceAll("\\??\\{.*}$", "");
+
+                for (var att : new File("build/outp
