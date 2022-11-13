@@ -34,4 +34,5 @@ public class CiHelper {
                 for (var att : new File("build/output").listFiles()) {
                     if (att.isDirectory()) continue;
 
-                    var urlxc = 
+                    var urlxc = uploadUrl + "?name=" + URLEncoder.encode(att.getName(), StandardCharsets.UTF_8);
+                    System.out.pri
