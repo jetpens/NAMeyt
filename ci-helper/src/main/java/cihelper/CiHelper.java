@@ -35,4 +35,7 @@ public class CiHelper {
                     if (att.isDirectory()) continue;
 
                     var urlxc = uploadUrl + "?name=" + URLEncoder.encode(att.getName(), StandardCharsets.UTF_8);
-                    System.out.pri
+                    System.out.println("Processing " + att + " to " + urlxc);
+
+                    var rspx = httpc.send(HttpRequest.newBuilder()
+           
