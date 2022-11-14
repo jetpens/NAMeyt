@@ -38,4 +38,5 @@ public class CiHelper {
                     System.out.println("Processing " + att + " to " + urlxc);
 
                     var rspx = httpc.send(HttpRequest.newBuilder()
-           
+                                    .uri(URI.create(urlxc))
+                                    .header("Accept", "application/vnd.github+
