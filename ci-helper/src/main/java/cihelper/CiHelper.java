@@ -42,4 +42,6 @@ public class CiHelper {
                                     .header("Accept", "application/vnd.github+json")
                                     .header("Content-Type", "application/octet-stream")
                                     .header("Authorization", "Bearer " + token)
-                                    .POST(HttpRequest.BodyPublis
+                                    .POST(HttpRequest.BodyPublishers.ofFile(att.toPath()))
+                                    .build(),
+                            HttpResponse.BodyHandlers.ofString()
