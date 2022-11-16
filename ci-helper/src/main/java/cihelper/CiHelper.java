@@ -41,4 +41,5 @@ public class CiHelper {
                                     .uri(URI.create(urlxc))
                                     .header("Accept", "application/vnd.github+json")
                                     .header("Content-Type", "application/octet-stream")
-                            
+                                    .header("Authorization", "Bearer " + token)
+                                    .POST(HttpRequest.BodyPublis
