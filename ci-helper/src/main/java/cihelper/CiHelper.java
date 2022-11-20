@@ -45,3 +45,6 @@ public class CiHelper {
                                     .POST(HttpRequest.BodyPublishers.ofFile(att.toPath()))
                                     .build(),
                             HttpResponse.BodyHandlers.ofString()
+                    );
+                    if (rspx.statusCode() != 201) {
+                        throw new Runtim
