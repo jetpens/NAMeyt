@@ -47,4 +47,10 @@ public class CiHelper {
                             HttpResponse.BodyHandlers.ofString()
                     );
                     if (rspx.statusCode() != 201) {
-                        throw new Runtim
+                        throw new RuntimeException(rspx.body());
+                    }
+                }
+            }
+        }
+    }
+}
