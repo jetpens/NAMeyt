@@ -1,2 +1,7 @@
 plugins {
-    id 'net.mamoe.mir
+    id 'net.mamoe.mirai-console' version '2.13.0-RC'
+    id 'org.jetbrains.kotlin.jvm'
+}
+
+dependencies {
+    implementation 'com.miglayout
