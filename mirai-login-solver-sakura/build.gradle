@@ -4,4 +4,6 @@ plugins {
 }
 
 dependencies {
-    implementation 'com.miglayout
+    implementation 'com.miglayout:miglayout-swing:11.0'
+    implementation 'com.google.zxing:javase:3.5.0'
+    implementation 'com.google.code.gson:gson:2
