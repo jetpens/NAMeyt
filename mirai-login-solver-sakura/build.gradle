@@ -15,4 +15,8 @@ dependencies {
 
     implementation netty('codec-http')
     implementation netty('codec-socks')
-    implementation netty('t
+    implementation netty('transport')
+
+
+    testImplementation 'com.formdev:flatlaf:2.5'
+    testImplementation 'com.formdev:flatlaf-intell
