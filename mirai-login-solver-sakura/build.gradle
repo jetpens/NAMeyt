@@ -11,3 +11,8 @@ dependencies {
 
     def netty = { module ->
         "io.netty:netty-" + module + ":4.1.85.Final"
+    }
+
+    implementation netty('codec-http')
+    implementation netty('codec-socks')
+    implementation netty('t
