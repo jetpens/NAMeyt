@@ -29,4 +29,7 @@ mirai {
 processResources {
     from project.file('src/extres')
 
-    e
+    expand([
+            '===============': '',
+            projver          : rootProject.version,
+            commiti
