@@ -32,4 +32,7 @@ processResources {
     expand([
             '===============': '',
             projver          : rootProject.version,
-            commiti
+            commitid         : rootProject.property('proj.commitid'),
+    ])
+}
+
