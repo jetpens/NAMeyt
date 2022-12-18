@@ -9,4 +9,8 @@
 
 package com.kasukusakura.mlss
 
-impor
+import java.util.*
+
+internal object ProjMetadata {
+    private val prop: Properties by lazy {
+        Properties().also {
