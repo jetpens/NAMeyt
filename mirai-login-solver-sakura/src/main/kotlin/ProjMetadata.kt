@@ -13,4 +13,5 @@ import java.util.*
 
 internal object ProjMetadata {
     private val prop: Properties by lazy {
-        Properties().also {
+        Properties().also { rsp ->
+            ProjMetadata::class.java.getResourceAsStream("metadata.properties")?.bufferedReader()?.use { rsp.load(it
