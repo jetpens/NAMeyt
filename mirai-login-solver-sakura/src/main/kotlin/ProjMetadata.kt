@@ -14,4 +14,9 @@ import java.util.*
 internal object ProjMetadata {
     private val prop: Properties by lazy {
         Properties().also { rsp ->
-            ProjMetadata::class.java.getResourceAsStream("metadata.properties")?.bufferedReader()?.use { rsp.load(it
+            ProjMetadata::class.java.getResourceAsStream("metadata.properties")?.bufferedReader()?.use { rsp.load(it) }
+        }
+    }
+
+    operator fun get(key: String): String = prop.getProperty(key) ?: error("`$key` not found in metadata")
+}
