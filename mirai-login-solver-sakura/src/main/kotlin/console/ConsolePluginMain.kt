@@ -78,3 +78,23 @@ object ConsolePluginMain : KotlinPlugin(
             object : CommonTerminalLoginSolver(server) {
                 override fun printMsg(msg: String) {
                     logger.info(msg)
+                }
+
+                override suspend fun requestInput(hint: String): String = MiraiConsole.requestInput(hint)
+
+                override val isCtrlCSupported: Boolean get() = false
+            }
+        } else {
+            SakuraLoginSolver(server)
+        }
+
+        contributeBotConfigurationAlterer { botid, botconf ->
+            botconf.loginSolver = solver
+            return@contributeBotConfigurationAlterer botconf
+        }
+
+    }
+
+    override fun onEnable() {
+    }
+}
