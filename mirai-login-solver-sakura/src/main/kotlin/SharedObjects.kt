@@ -1,3 +1,4 @@
+
 /*
  * Copyright 2021-2022 KasukuSakura Technologies and contributors.
  *
@@ -9,14 +10,8 @@
 
 package com.kasukusakura.mlss
 
-import java.util.*
+import java.net.http.HttpClient
 
-internal object ProjMetadata {
-    private val prop: Properties by lazy {
-        Properties().also { rsp ->
-            ProjMetadata::class.java.getResourceAsStream("metadata.properties")?.bufferedReader()?.use { rsp.load(it) }
-        }
-    }
-
-    operator fun get(key: String): String = prop.getProperty(key) ?: error("`$key` not found in metadata")
+internal object SharedObjects {
+    val httpclient: HttpClient = HttpClient.newHttpClient()
 }
