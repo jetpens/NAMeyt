@@ -95,3 +95,73 @@ abstract class CommonTerminalLoginSolver(
 
 
                 try {
+                    requestInput(
+                        if (isCtrlCSupported) "按任意键继续, 按 「Ctrl+C」 取消"
+                        else "按任意键继续"
+                    ) ?: return@process null
+
+                    return@process fallback.solved()
+                } finally {
+                    req.fireCompleted()
+                }
+            }
+        }
+        requests.sms?.let { sms ->
+            resolveMethods["sms"] = process@{
+
+                printMsg("需要短信验证 -> (+${sms.countryCode}) ${sms.phoneNumber}")
+                printMsg("直接按下 「Enter」 发送短信, 输入验证码完成验证")
+                if (isCtrlCSupported) {
+                    printMsg("按下「Ctrl+C」取消")
+                }
+
+                while (true) {
+                    val value = requestInput("> ") ?: return@process null
+                    if (value.isBlank()) {
+                        sms.requestSms()
+                        printMsg("短信已发出. 请自行留意短信重发时间")
+                        printMsg("高频请求验证码可能导致账户被停用")
+                        continue
+                    }
+                    return@process sms.solved(value)
+                }
+
+                @Suppress("UNREACHABLE_CODE")
+                return@process null
+            }
+        }
+
+        try {
+            if (resolveMethods.isEmpty()) {
+                printMsg("Error: No resolve methods available")
+                throw UnsafeDeviceLoginVerifyCancelledException(true, "No resolve methods available")
+            }
+
+            while (true) {
+                setLineReaderCompleting(resolveMethods.keys)
+
+                printMsg("可用方法: ${resolveMethods.keys.joinToString(", ")}")
+                if (isCtrlCSupported) {
+                    printMsg("输入 「cancel」 取消 / 按下 「Ctrl+C」 取消")
+                } else {
+                    printMsg("输入 「cancel」 取消")
+                }
+
+                val optionSelected = requestInput("> ")
+                if (optionSelected.isNullOrBlank() || optionSelected == "cancel") {
+                    throw UnsafeDeviceLoginVerifyCancelledException(true, "Cancelled")
+                }
+                val met = resolveMethods[optionSelected]
+                if (met == null) {
+                    printMsg("未知方法: $optionSelected")
+                    continue
+                }
+                setLineReaderCompleting(emptyList())
+                met.invoke()?.let { return it }
+            }
+
+        } finally {
+            setLineReaderCompleter(originTabCompleter)
+        }
+    }
+}
