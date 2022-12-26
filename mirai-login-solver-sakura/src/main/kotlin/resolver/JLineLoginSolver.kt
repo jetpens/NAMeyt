@@ -11,4 +11,7 @@ package com.kasukusakura.mlss.resolver
 
 import com.kasukusakura.mlss.slovbroadcast.SakuraTransmitDaemon
 import kotlinx.coroutines.runInterruptible
-import org.jline.reader.Complete
+import org.jline.reader.Completer
+import org.jline.reader.LineReader
+import org.jline.reader.UserInterruptException
+import org.jline.
