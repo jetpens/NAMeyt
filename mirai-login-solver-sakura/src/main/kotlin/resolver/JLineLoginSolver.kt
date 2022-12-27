@@ -17,4 +17,8 @@ import org.jline.reader.UserInterruptException
 import org.jline.reader.impl.LineReaderImpl
 import org.jline.reader.impl.completer.StringsCompleter
 
-class JLineLoginSo
+class JLineLoginSolver(
+    daemon: SakuraTransmitDaemon,
+    private val lineReader: LineReader,
+) : CommonTerminalLoginSolver(daemon) {
+ 
