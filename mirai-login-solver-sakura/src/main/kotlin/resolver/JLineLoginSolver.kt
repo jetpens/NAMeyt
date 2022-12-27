@@ -14,4 +14,7 @@ import kotlinx.coroutines.runInterruptible
 import org.jline.reader.Completer
 import org.jline.reader.LineReader
 import org.jline.reader.UserInterruptException
-import org.jline.
+import org.jline.reader.impl.LineReaderImpl
+import org.jline.reader.impl.completer.StringsCompleter
+
+class JLineLoginSo
