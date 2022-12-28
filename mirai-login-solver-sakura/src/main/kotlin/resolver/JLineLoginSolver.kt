@@ -25,4 +25,7 @@ class JLineLoginSolver(
         lineReader.printAbove(msg)
     }
 
-    override suspend fun requestI
+    override suspend fun requestInput(hint: String): String? {
+        return runInterruptible {
+            try {
+                return@r
