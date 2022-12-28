@@ -21,4 +21,8 @@ class JLineLoginSolver(
     daemon: SakuraTransmitDaemon,
     private val lineReader: LineReader,
 ) : CommonTerminalLoginSolver(daemon) {
- 
+    override fun printMsg(msg: String) {
+        lineReader.printAbove(msg)
+    }
+
+    override suspend fun requestI
