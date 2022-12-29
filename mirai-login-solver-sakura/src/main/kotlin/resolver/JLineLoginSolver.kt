@@ -30,4 +30,10 @@ class JLineLoginSolver(
             try {
                 return@runInterruptible lineReader.readLine(hint)
             } catch (_: UserInterruptException) {
-                retur
+                return@runInterruptible null
+            }
+        }
+    }
+
+    override val isCtrlCSupported: Boolean get() = true
+    override fu
