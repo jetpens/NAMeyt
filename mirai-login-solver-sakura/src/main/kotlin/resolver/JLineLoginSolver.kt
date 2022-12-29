@@ -28,4 +28,6 @@ class JLineLoginSolver(
     override suspend fun requestInput(hint: String): String? {
         return runInterruptible {
             try {
-                return@r
+                return@runInterruptible lineReader.readLine(hint)
+            } catch (_: UserInterruptException) {
+                retur
