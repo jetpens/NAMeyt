@@ -36,4 +36,8 @@ class JLineLoginSolver(
     }
 
     override val isCtrlCSupported: Boolean get() = true
-    override fu
+    override fun acquireLineReaderCompleter(): Any? {
+        return (lineReader as? LineReaderImpl?)?.completer
+    }
+
+    
