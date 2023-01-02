@@ -46,4 +46,7 @@ class JLineLoginSolver(
         impl.completer = completer
     }
 
-    override fun setLineReaderCompleting(words: Iterable<
+    override fun setLineReaderCompleting(words: Iterable<String>) {
+        setLineReaderCompleter(StringsCompleter(words))
+    }
+}
