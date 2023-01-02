@@ -41,4 +41,9 @@ class JLineLoginSolver(
     }
 
     override fun setLineReaderCompleter(completer: Any?) {
-        val impl = lineReader as? LineReaderImpl ?: retu
+        val impl = lineReader as? LineReaderImpl ?: return
+        completer as Completer?
+        impl.completer = completer
+    }
+
+    override fun setLineReaderCompleting(words: Iterable<
