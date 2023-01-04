@@ -141,3 +141,103 @@ internal class WindowsOptions(
     val BTN_OK by lazy {
         ButtonFactory(
             UIManager.getString("OptionPane.okButtonText", l),
+            getMnemonic("OptionPane.okButtonMnemonic", l),
+            null, -1
+        )
+    }
+    val BTN_CANCEL by lazy {
+        ButtonFactory(
+            UIManager.getString("OptionPane.cancelButtonText", l),
+            getMnemonic("OptionPane.cancelButtonMnemonic", l),
+            null, -1
+        )
+    }
+
+    fun ButtonFactory.withValue(v: WindowResult): JButton = withAction {
+        optionPane.value = v
+    }
+
+    fun ButtonFactory.withValue(block: () -> WindowResult): JButton = withAction {
+        optionPane.value = block()
+    }
+
+    fun JButton.withValue(v: WindowResult): JButton = withAction {
+        optionPane.value = v
+    }
+
+    fun JButton.withValue(block: () -> WindowResult): JButton = withAction {
+        optionPane.value = block()
+    }
+
+    fun ButtonFactory.withAction(action: ActionListener): JButton {
+        return createButton().also { btn ->
+            btn.name = "OptionPane.button"
+            btn.addActionListener(action)
+        }
+    }
+
+    fun ButtonFactory.attachToTextField(field: JTextField): JButton = withAction {
+        optionPane.value = WindowResult.Confirmed(field.text)
+    }
+
+    fun <T : Any> T.asInitialValue(): T {
+        optionPane.initialValue = this@asInitialValue
+        return this@asInitialValue
+    }
+
+    fun openBrowserOrAlert(url: String) {
+        // Try to open browser safely. mamoe/mirai#694
+        try {
+            Desktop.getDesktop().browse(URI(url))
+        } catch (ex: Exception) {
+            JOptionPane.showInputDialog(
+                parentWindow,
+                "Failed to open external url",
+                windowTitle,
+                JOptionPane.WARNING_MESSAGE,
+                null,
+                null,
+                url
+            )
+        }
+    }
+
+    val windowTitle: String
+        get() {
+            return when (val pw = parentWindow) {
+                is JFrame -> pw.title
+                else -> (pw as Dialog).title
+            }
+        }
+
+    fun alertError(msg: String) {
+        JOptionPane.showMessageDialog(
+            parentWindow,
+            msg,
+            windowTitle,
+            JOptionPane.ERROR_MESSAGE
+        )
+    }
+
+    internal fun <T> runBlockingAWT(action: suspend CoroutineScope.() -> T): T =
+        runBlocking(swingActionsScope.coroutineContext, block = action)
+
+    internal fun JButton.withActionBlocking(action: suspend CoroutineScope.() -> Unit): JButton = withAction {
+        runBlockingAWT(action)
+    }
+
+    internal fun JButton.withActionBlockingAE(
+        action: suspend CoroutineScope.(ActionEvent) -> Unit
+    ): JButton = withAction { evt ->
+        runBlocking(swingActionsScope.coroutineContext) {
+            action(evt)
+        }
+    }
+
+}
+
+internal class ButtonFactory(
+    private val text: String,
+    private val mnemonic: Int,
+    private val icon: Icon?,
+    private val minimumWidth: Int = -1,
