@@ -241,3 +241,137 @@ internal class ButtonFactory(
     private val mnemonic: Int,
     private val icon: Icon?,
     private val minimumWidth: Int = -1,
+) {
+
+    fun createButton(): JButton {
+        val button = if (minimumWidth > 0) {
+            ConstrainedButton(text, minimumWidth)
+        } else {
+            JButton(text)
+        }
+        if (icon != null) {
+            button.icon = icon
+        }
+        if (mnemonic != 0) {
+            button.mnemonic = mnemonic
+        }
+        return button
+    }
+
+    private class ConstrainedButton(text: String?, val minimumWidth: Int) : JButton(text) {
+        override fun getMinimumSize(): Dimension {
+            val min = super.getMinimumSize()
+            min.width = min.width.coerceAtLeast(minimumWidth)
+            return min
+        }
+
+        override fun getPreferredSize(): Dimension {
+            val pref = super.getPreferredSize()
+            pref.width = pref.width.coerceAtLeast(minimumWidth)
+            return pref
+        }
+    }
+}
+
+internal suspend fun openWindowCommon(
+    window: Window,
+    title: String,
+    isTopLevel: Boolean = true,
+    blockingDisplay: Boolean = false,
+    overrideResponse: CompletableDeferred<WindowResult>? = null,
+    action: WindowsOptions.() -> Unit,
+): WindowResult {
+    val currentCoroutineContext = currentCoroutineContext()
+    val subSupervisorJob = SupervisorJob(parent = currentCoroutineContext[Job])
+    val subSwingSupervisorJob = SupervisorJob(parent = subSupervisorJob)
+    val subCoroutineScope = CoroutineScope(currentCoroutineContext + subSupervisorJob)
+    val swingActionsScope = CoroutineScope(currentCoroutineContext + subSwingSupervisorJob + SwingxDispatcher)
+
+    val response = overrideResponse ?: CompletableDeferred()
+
+    val optionPane = JOptionPane()
+    optionPane.messageType = JOptionPane.PLAIN_MESSAGE
+    optionPane.optionType = JOptionPane.OK_CANCEL_OPTION
+
+    val contentPane = JPanel()
+    val migLayout = MigLayout("", "[][][fill,grow]", "")
+    contentPane.layout = migLayout
+    optionPane.message = contentPane
+
+
+    val realWindow = if (isTopLevel) {
+        (window as JFrame).title = title
+        window
+    } else {
+        JDialog(window, title, Dialog.ModalityType.APPLICATION_MODAL)
+    }
+
+    response.invokeOnCompletion {
+        SwingUtilities.invokeLater { realWindow.dispose() }
+    }
+
+    action.invoke(
+        WindowsOptions(
+            layout = migLayout,
+            contentPane = contentPane,
+            optionPane = optionPane,
+            response = response,
+            parentWindow = realWindow,
+            subCoroutineScope = subCoroutineScope,
+            swingActionsScope = swingActionsScope,
+        )
+    )
+
+    fun processed() {
+        val value0 = optionPane.value
+        if (value0 is WindowResult) response.complete(value0)
+        if (optionPane.options == null) {
+            val rsp = when (value0) {
+                JOptionPane.OK_OPTION -> WindowResult.SelectedOK
+                JOptionPane.CANCEL_OPTION -> WindowResult.Cancelled
+                JOptionPane.NO_OPTION -> WindowResult.Cancelled
+                else -> WindowResult.Cancelled // Unknown
+            }
+            response.complete(rsp)
+        } else {
+            // Unknown
+            response.complete(WindowResult.Cancelled)
+        }
+    }
+
+    val listener = PropertyChangeListener { evt ->
+        if (realWindow.isVisible && evt.source === optionPane) {
+            if (evt.propertyName != JOptionPane.VALUE_PROPERTY) return@PropertyChangeListener
+            if (evt.newValue != null && evt.newValue != JOptionPane.UNINITIALIZED_VALUE) {
+                realWindow.isVisible = false
+            }
+        }
+    }
+    optionPane.selectInitialValue()
+    optionPane.addPropertyChangeListener(listener)
+    val adapter = object : WindowAdapter() {
+        private var gotFocus = false
+        override fun windowClosing(we: WindowEvent?) {
+            // println("Window closing....")
+            response.complete(WindowResult.WindowClosed)
+
+            optionPane.value = null
+        }
+
+        override fun windowClosed(e: WindowEvent?) {
+            optionPane.removePropertyChangeListener(listener)
+
+            response.complete(WindowResult.WindowClosed)
+        }
+
+        override fun windowGainedFocus(we: WindowEvent?) {
+            // Once window gets focus, set initial focus
+            if (!gotFocus) {
+                optionPane.selectInitialValue()
+                gotFocus = true
+            }
+        }
+    }
+    realWindow.addWindowListener(adapter)
+    realWindow.addWindowFocusListener(adapter)
+    realWindow.addHierarchyListener { evt ->
