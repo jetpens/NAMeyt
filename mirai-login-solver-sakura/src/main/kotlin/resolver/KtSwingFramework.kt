@@ -375,3 +375,67 @@ internal suspend fun openWindowCommon(
     realWindow.addWindowListener(adapter)
     realWindow.addWindowFocusListener(adapter)
     realWindow.addHierarchyListener { evt ->
+        if (evt.source !== realWindow) return@addHierarchyListener
+        if (evt.changed !== realWindow) return@addHierarchyListener
+        if (realWindow.isVisible) return@addHierarchyListener
+        if (evt.id == HierarchyEvent.HIERARCHY_CHANGED) {
+            if ((evt.changeFlags and HierarchyEvent.SHOWING_CHANGED.toLong()) != 0L) {
+                // Windows disposing...
+                processed()
+            }
+        }
+
+    }
+    realWindow.addComponentListener(object : ComponentAdapter() {
+        override fun componentShown(ce: ComponentEvent) {
+            // reset value to ensure closing works properly
+            optionPane.value = JOptionPane.UNINITIALIZED_VALUE
+        }
+    })
+
+    if (isTopLevel) {
+        window as JFrame
+        window.contentPane = optionPane
+        window.defaultCloseOperation = JFrame.DISPOSE_ON_CLOSE
+    } else {
+        realWindow.layout = BorderLayout()
+        realWindow.add(optionPane, BorderLayout.CENTER)
+        realWindow.componentOrientation = window.componentOrientation
+    }
+    realWindow.pack()
+    if (isTopLevel) {
+        window.setLocationRelativeTo(null)
+    } else {
+        realWindow.setLocationRelativeTo(window)
+    }
+    if (blockingDisplay) {
+        realWindow.isVisible = true
+    } else {
+        SwingUtilities.invokeLater { realWindow.isVisible = true }
+    }
+
+    return try {
+        response.await().also {
+            subSwingSupervisorJob.complete()
+            subSwingSupervisorJob.join()
+            subSupervisorJob.cancel()
+        }
+    } catch (anyErr: Throwable) {
+        subSupervisorJob.completeExceptionally(anyErr)
+        throw anyErr
+    }
+}
+
+internal fun JButton.withAction(action: ActionListener): JButton = apply {
+    addActionListener(action)
+}
+
+internal object SwingxDispatcher : CoroutineDispatcher() {
+    override fun dispatch(context: CoroutineContext, block: Runnable) {
+        if (SwingUtilities.isEventDispatchThread()) {
+            block.run()
+        } else {
+            SwingUtilities.invokeLater(block)
+        }
+    }
+}
