@@ -55,3 +55,18 @@ internal abstract class MZDTxCaptchaHelper {
                         }
                     } else {
                         onComplete(rspText)
+                        return@launch
+                    }
+                } catch (e: Throwable) {
+                    updateDisplay(e.toString().also { latestDisplay = it })
+                }
+                delay(1000)
+            }
+        }
+        this.queue = queue
+    }
+
+    fun dispose() {
+        queue.cancel()
+    }
+}
