@@ -15,4 +15,7 @@ import com.google.zxing.common.BitMatrix
 import com.google.zxing.qrcode.QRCodeWriter
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
 import com.google.zxing.qrcode.encoder.QRCode
-impor
+import java.awt.image.BufferedImage
+import com.google.zxing.qrcode.encoder.Encoder as QRCodeEncoder
+
+intern
