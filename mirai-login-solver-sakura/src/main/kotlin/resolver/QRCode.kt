@@ -18,4 +18,6 @@ import com.google.zxing.qrcode.encoder.QRCode
 import java.awt.image.BufferedImage
 import com.google.zxing.qrcode.encoder.Encoder as QRCodeEncoder
 
-intern
+internal fun String.renderQRCode(width: Int = 500, height: Int = 500): BufferedImage {
+    val bitMatrix = QRCodeWriter().encode(
+ 
