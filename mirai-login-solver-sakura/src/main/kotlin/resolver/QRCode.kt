@@ -26,4 +26,8 @@ internal fun String.renderQRCode(width: Int = 500, height: Int = 500): BufferedI
         height
     )
 
-    return MatrixToImageWriter.to
+    return MatrixToImageWriter.toBufferedImage(bitMatrix)
+}
+
+
+internal fun String.toQRCode(el: ErrorCorrectionLevel = ErrorCorrectionLevel.L): Q
