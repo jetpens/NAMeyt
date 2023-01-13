@@ -20,4 +20,10 @@ import com.google.zxing.qrcode.encoder.Encoder as QRCodeEncoder
 
 internal fun String.renderQRCode(width: Int = 500, height: Int = 500): BufferedImage {
     val bitMatrix = QRCodeWriter().encode(
- 
+        this,
+        BarcodeFormat.QR_CODE,
+        width,
+        height
+    )
+
+    return MatrixToImageWriter.to
