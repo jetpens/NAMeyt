@@ -34,4 +34,8 @@ internal fun String.toQRCode(el: ErrorCorrectionLevel = ErrorCorrectionLevel.L):
     QRCodeEncoder.encode(this, el, null)
 
 internal fun QRCode.renderToBitMatrix(): BitMatrix {
-    v
+    val input = matrix
+
+    val rsp = BitMatrix(input.width, input.height)
+    for (x in 0 until input.width) {
+        
