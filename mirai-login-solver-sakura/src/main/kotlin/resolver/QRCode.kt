@@ -30,4 +30,8 @@ internal fun String.renderQRCode(width: Int = 500, height: Int = 500): BufferedI
 }
 
 
-internal fun String.toQRCode(el: ErrorCorrectionLevel = ErrorCorrectionLevel.L): Q
+internal fun String.toQRCode(el: ErrorCorrectionLevel = ErrorCorrectionLevel.L): QRCode =
+    QRCodeEncoder.encode(this, el, null)
+
+internal fun QRCode.renderToBitMatrix(): BitMatrix {
+    v
