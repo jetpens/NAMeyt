@@ -38,4 +38,7 @@ internal fun QRCode.renderToBitMatrix(): BitMatrix {
 
     val rsp = BitMatrix(input.width, input.height)
     for (x in 0 until input.width) {
-        
+        for (y in 0 until input.height) {
+            if (input.get(x, y).toInt() == 1) {
+                rsp.set(x, y)
+  
