@@ -41,4 +41,12 @@ internal fun QRCode.renderToBitMatrix(): BitMatrix {
         for (y in 0 until input.height) {
             if (input.get(x, y).toInt() == 1) {
                 rsp.set(x, y)
-  
+            }
+        }
+    }
+
+    return rsp
+}
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun BitMatrix.render(): 
