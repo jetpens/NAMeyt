@@ -52,4 +52,7 @@ internal fun QRCode.renderToBitMatrix(): BitMatrix {
 inline fun BitMatrix.render(): BufferedImage = MatrixToImageWriter.toBufferedImage(this)
 
 private const val ANSI_RESET = "\u001b[0m"
-internal fun
+internal fun BitMatrix.renderAsAnsi(
+    builder: StringBuilder,
+    onColor: String = "\u001b[40m",
+    offColor: String = "\u001b[
