@@ -55,4 +55,10 @@ private const val ANSI_RESET = "\u001b[0m"
 internal fun BitMatrix.renderAsAnsi(
     builder: StringBuilder,
     onColor: String = "\u001b[40m",
-    offColor: String = "\u001b[
+    offColor: String = "\u001b[47m",
+) {
+    builder.append('\n')
+    repeat(2) {
+        builder.append(offColor)
+        repeat(width + 4) {
+            build
