@@ -65,4 +65,10 @@ internal fun BitMatrix.renderAsAnsi(
         }
         builder.append(ANSI_RESET).append('\n')
     }
-    for (y in 0 until height)
+    for (y in 0 until height) {
+
+        var current = false
+        builder.append(offColor)
+        builder.append("    ")
+
+        for (x in 0 until w
