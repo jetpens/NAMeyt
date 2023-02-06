@@ -73,4 +73,8 @@ internal fun BitMatrix.renderAsAnsi(
 
         for (x in 0 until width) {
             if (current != this[x, y].also { current = it }) {
-                builder.append(if (current) onColor else
+                builder.append(if (current) onColor else offColor)
+            }
+            builder.append(' ').append(' ')
+        }
+        if (current) 
