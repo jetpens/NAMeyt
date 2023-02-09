@@ -77,4 +77,8 @@ internal fun BitMatrix.renderAsAnsi(
             }
             builder.append(' ').append(' ')
         }
-        if (current) 
+        if (current) {
+            builder.append(offColor)
+        }
+        builder.append("    ")
+        builder.append(ANSI_RESET).append('\n')
