@@ -87,4 +87,10 @@ internal fun BitMatrix.renderAsAnsi(
     repeat(2) {
         builder.append(offColor)
         repeat(width + 4) {
-            builder.a
+            builder.append(' ').append(' ')
+        }
+        builder.append(ANSI_RESET).append('\n')
+    }
+
+    builder.append("\n\n")
+}
