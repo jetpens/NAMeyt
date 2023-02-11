@@ -120,3 +120,124 @@ class SakuraLoginSolver(
                     val rspx = openWindowCommon(
                         window = parentWindow,
                         isTopLevel = false,
+                        blockingDisplay = true,
+                        title = "SliderCaptcha($botid) - SakuraCaptchaHelper"
+                    ) {
+                        appendFillX(JLabel("请使用 Sakura Login Solver (配套app) 扫描此二维码"))
+                        appendFillX(JLabel("注: 手机与此设备应该在同一内网中 (即连接同一个网络)"))
+                        val req24 = daemon.newRequest(JsonObject().also { jo ->
+                            jo.addProperty("type", "slider")
+                            jo.addProperty("url", captchaUrl)
+                        })
+
+                        val qrx = req24.renderQR()
+                        val jl = JLabel()
+                        jl.icon = ImageIcon(
+                            MatrixToImageWriter.toBufferedImage(
+                                qrx, MatrixToImageConfig(
+                                    Color.black.rgb,
+                                    Color.white.rgb,
+                                )
+                            )
+                        )
+                        appendFillX(jl)
+                        appendFillX(JLabel("http://<ip>:${daemon.serverPort}/request/request/${req24.requestId}"))
+                        appendFillX(
+                            JLabel("Version " + ProjMetadata["proj.projver"] + " " + ProjMetadata["proj.commitid"]).also { verinf ->
+                                verinf.foreground = Color.GRAY
+                            }
+                        )
+                        optionPane.options = arrayOf(
+                            BTN_CANCEL.withValue(WindowResult.Cancelled),
+                        )
+
+                        subCoroutineScope.launch {
+                            val rspxwfx = req24.awaitResponse().useByteBuf { it.toString(StandardCharsets.UTF_8) }
+                            response.complete(WindowResult.Confirmed(rspxwfx))
+                        }
+                    }
+
+                    if (!rspx.cancelled) {
+                        response.complete(rspx)
+                    }
+                },
+                BTN_OK.attachToTextField(filledTextField("ticket", "")).asInitialValue(),
+                BTN_CANCEL.withValue(WindowResult.Cancelled),
+            )
+        }
+        if (rspx.cancelled) {
+            throw UnsafeDeviceLoginVerifyCancelledException(true, "Cancelled")
+        }
+        return rspx.valueAsString
+    }
+
+    internal suspend fun onDeviceVerification(
+        botid: Long,
+        requests: DeviceVerificationRequests
+    ): DeviceVerificationResult {
+        val rsp = openWindowCommon(JFrameWithIco(), isTopLevel = true, title = "Device Verify($botid)") {
+            val options = mutableListOf<JButton>()
+
+            appendFillX(JLabel("此账户需要安全认证, 请选择以下一种验证方式"))
+
+            requests.sms?.let { smsreq ->
+                options.add(JButton("短信验证").withActionBlocking {
+                    val rsp = onSolveUnsafeDeviceSMSVerify(botid, smsreq, this@openWindowCommon)
+                    if (!rsp.cancelled) {
+                        response.complete(rsp)
+                    }
+                })
+            }
+            requests.fallback?.let { fallback ->
+                options.add(JButton("设备锁验证").withActionBlocking {
+                    val rsp = onSolveUnsafeDeviceFallbackLoginVerify(botid, fallback, this@openWindowCommon)
+                    if (!rsp.cancelled) {
+                        response.complete(rsp)
+                    }
+                })
+            }
+
+            if (options.isEmpty()) {
+                options.add(JButton("非常抱歉, 没有任何可用选项"))
+            }
+
+            options.add(BTN_CANCEL.withValue(WindowResult.Cancelled))
+
+            optionPane.options = options.toTypedArray()
+        }
+
+        if (rsp.cancelled) {
+            throw UnsafeDeviceLoginVerifyCancelledException(true, "Cancelled")
+        }
+        if (rsp is WindowResult.ConfirmedAnything) {
+            return rsp.value as DeviceVerificationResult
+        }
+        throw UnsafeDeviceLoginVerifyCancelledException(false, "Unknown result $rsp")
+    }
+
+    internal suspend fun onSolveUnsafeDeviceSMSVerify(
+        botid: Long,
+        req: DeviceVerificationRequests.SmsRequest,
+        parent: WindowsOptions
+    ): WindowResult {
+        val rspx = openWindowCommon(
+            parent.parentWindow, isTopLevel = false,
+            blockingDisplay = true,
+            title = "SMS Verify($botid)",
+        ) {
+            appendFillX(JLabel("An SMS verification required for this login"))
+            appendFillX(JLabel("${req.countryCode} ${req.phoneNumber}"))
+
+            val codeid = filledTextField("code", "")
+
+            val btnResend = JButton("发送短信")
+            val btnCooldown = AtomicLong()
+
+            subCoroutineScope.launch {
+                while (isActive) {
+                    val now = System.currentTimeMillis()
+                    if (btnCooldown.get() != 0L) {
+                        val mitx = now - btnCooldown.get()
+                        if (mitx > 60000) {
+                            btnResend.text = "重发短信"
+                            btnResend.isEnabled = true
