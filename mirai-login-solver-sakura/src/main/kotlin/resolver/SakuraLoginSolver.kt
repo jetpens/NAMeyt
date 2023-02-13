@@ -241,3 +241,98 @@ class SakuraLoginSolver(
                         if (mitx > 60000) {
                             btnResend.text = "重发短信"
                             btnResend.isEnabled = true
+                            btnCooldown.set(0L)
+                            btnResend.putClientProperty("JComponent.outline", null)
+                        } else {
+                            btnResend.text = "重发短信 (" + ((60000L - mitx) / 1000L) + "s)"
+                        }
+                    }
+                    delay(500L)
+                }
+            }
+
+            var lastWhenX = 0L
+            btnResend.addMouseListener(object : MouseAdapter() {
+
+                override fun mouseClicked(e: MouseEvent) {
+                    if (e.`when` - lastWhenX < 100L) return
+                    lastWhenX = e.`when`
+
+                    if (btnResend.isEnabled) return
+
+                    btnResend.putClientProperty("JComponent.outline", "error")
+                    btnResend.isEnabled = true
+                }
+            })
+
+            optionPane.options = arrayOf(
+                btnResend.withAction { evt ->
+                    lastWhenX = evt.`when`
+
+                    btnResend.isEnabled = false
+                    btnCooldown.set(System.currentTimeMillis())
+
+                    subCoroutineScope.launch { req.requestSms() }
+                },
+                BTN_OK.attachToTextField(codeid).asInitialValue(),
+                BTN_CANCEL.withValue(WindowResult.Cancelled),
+            )
+        }
+        if (rspx is WindowResult.Confirmed) {
+            return WindowResult.ConfirmedAnything(req.solved(rspx.valueAsString))
+        }
+        return rspx
+    }
+
+    internal suspend fun onSolveUnsafeDeviceFallbackLoginVerify(
+        botid: Long, req: DeviceVerificationRequests.FallbackRequest,
+        parent: WindowsOptions
+    ): WindowResult {
+        return openWindowCommon(
+            parent.parentWindow, isTopLevel = false,
+            blockingDisplay = true,
+            title = "UnsafeDeviceVerify($botid)"
+        ) {
+            appendFillX(
+                JLabel(
+                    """
+                <html>
+                需要进行账户安全认证<br>
+                该账户有设备锁/不常用登录地点/不常用设备登录的问题<br>
+                请在<span style="color: red">手机QQ</span>打开下面链接
+            """.trimIndent()
+                )
+            )
+            filledTextField("url", req.url)
+            appendFillX(JLabel(ImageIcon(req.url.renderQRCode())))
+            optionPane.options = arrayOf(
+                JButton("已完成").withValue { WindowResult.ConfirmedAnything(req.solved()) }
+            )
+        }
+    }
+
+    private fun JFrameWithIco(): JFrame = JFrame().also { jfr ->
+        jfr.iconImage = iconx
+        jfr.rootPane.putClientProperty("JRootPane.titleBarShowIcon", false)
+    }
+}
+
+
+private val iconx: BufferedImage? by lazy {
+    ExternalResource::class.java.getResourceAsStream("project-mirai.png")?.use { resx ->
+        val imgiocache = ImageIO.getUseCache()
+        if (imgiocache) ImageIO.setUseCache(false)
+        try {
+            ImageIO.read(resx)
+        } finally {
+            if (imgiocache) ImageIO.setUseCache(true)
+        }
+    }
+}
+
+internal class UnsafeDeviceLoginVerifyCancelledException : CustomLoginFailedException {
+    public constructor(killBot: Boolean) : super(killBot)
+    public constructor(killBot: Boolean, message: String?) : super(killBot, message)
+    public constructor(killBot: Boolean, message: String?, cause: Throwable?) : super(killBot, message, cause)
+    public constructor(killBot: Boolean, cause: Throwable?) : super(killBot, cause = cause)
+}
