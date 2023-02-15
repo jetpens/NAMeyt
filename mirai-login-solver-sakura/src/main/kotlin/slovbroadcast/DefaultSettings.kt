@@ -7,4 +7,8 @@
  * https://github.com/KasukuSakura/mirai-login-solver-sakura/blob/main/LICENSE
  */
 
-package com.kasukusakura
+package com.kasukusakura.mlss.slovbroadcast
+
+@Suppress("MemberVisibilityCanBePrivate")
+internal object DefaultSettings {
+    fun sysPr
