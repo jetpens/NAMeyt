@@ -11,4 +11,8 @@ package com.kasukusakura.mlss.slovbroadcast
 
 @Suppress("MemberVisibilityCanBePrivate")
 internal object DefaultSettings {
-    fun sysPr
+    fun sysProp(key: String, def: Int): Int {
+        return System.getProperty(key)?.toIntOrNull() ?: def
+    }
+
+    fun sysProp(key: St
