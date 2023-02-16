@@ -15,4 +15,7 @@ internal object DefaultSettings {
         return System.getProperty(key)?.toIntOrNull() ?: def
     }
 
-    fun sysProp(key: St
+    fun sysProp(key: String, def: Boolean): Boolean {
+        val prop = System.getProperty(key) ?: return def
+        if (prop.isEmpty()) return true
+      
