@@ -23,4 +23,8 @@ internal object DefaultSettings {
     }
 
     fun sysProp(key: String, def: String): String {
-       
+        return System.getProperty(key, def)
+    }
+
+    fun sysProp(key: String, def: Long): Long {
+        return Sys
