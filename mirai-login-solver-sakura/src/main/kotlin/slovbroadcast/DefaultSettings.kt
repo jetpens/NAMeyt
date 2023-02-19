@@ -27,4 +27,7 @@ internal object DefaultSettings {
     }
 
     fun sysProp(key: String, def: Long): Long {
-        return Sys
+        return System.getProperty(key)?.toLongOrNull() ?: def
+    }
+
+    internal val noTunnel: Boolean by lazy { sysPro
