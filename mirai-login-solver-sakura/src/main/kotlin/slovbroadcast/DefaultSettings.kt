@@ -30,4 +30,6 @@ internal object DefaultSettings {
         return System.getProperty(key)?.toLongOrNull() ?: def
     }
 
-    internal val noTunnel: Boolean by lazy { sysPro
+    internal val noTunnel: Boolean by lazy { sysProp("mlss.no-tunnel", false) }
+    internal val serverPort: Int by lazy { sysProp("mlss.port", 0) }
+    internal val tunnelLimited: Bo
