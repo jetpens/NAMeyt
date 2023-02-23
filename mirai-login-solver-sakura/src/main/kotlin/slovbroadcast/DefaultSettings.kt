@@ -32,4 +32,5 @@ internal object DefaultSettings {
 
     internal val noTunnel: Boolean by lazy { sysProp("mlss.no-tunnel", false) }
     internal val serverPort: Int by lazy { sysProp("mlss.port", 0) }
-    internal val tunnelLimited: Bo
+    internal val tunnelLimited: Boolean by lazy { sysProp("mlss.tunnel.limited", true) }
+}
