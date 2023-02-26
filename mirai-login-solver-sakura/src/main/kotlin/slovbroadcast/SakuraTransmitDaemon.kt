@@ -77,3 +77,114 @@ class SakuraTransmitDaemon(
                         .addLast("w-timeout", WriteTimeoutHandler(2, TimeUnit.MINUTES))
                         .addFirst("exception-caught", object : ChannelInboundHandlerAdapter() {
                             @Suppress("OVERRIDE_DEPRECATION")
+                            override fun exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable?) {
+                                logger.error({ "${ctx.channel()} [exceptionCaught]" }, cause)
+
+                                ctx.fireExceptionCaught(cause)
+                            }
+                        })
+
+
+                    if (isSocksTunnelEnabled) {
+                        logger.debug { "$ch [initial] Waiting first packet" }
+
+                        ch.pipeline().addLast("1st-prepare-handler", FstPrepareHandler())
+                    } else {
+                        ch.pipeline()
+                            .addLast("http-req-decoder", HttpRequestDecoder())
+                            .addLast("http-rsp-encoder", HttpResponseEncoder())
+                            .addLast("http-handler", HttpConnectHandler())
+                    }
+                }
+            })
+            .bind(inetPort)
+            .sync()
+
+        if (rspx.isSuccess) {
+            serverChannel = rspx.channel() as ServerChannel
+        }
+    }
+
+    fun shutdown() {
+        if (::serverChannel.isInitialized) {
+            serverChannel.close().await()
+        }
+    }
+
+    inner class ResolveRequest {
+        fun fireCompleted() {
+            if (::continuation.isInitialized) {
+                val data = msgData
+                msgData = Unpooled.EMPTY_BUFFER
+                continuation.resumeWith(Result.success(data))
+            } else {
+                msgData.release()
+                msgData = Unpooled.EMPTY_BUFFER
+            }
+        }
+
+        var additionalHeaders: HttpHeaders = EmptyHttpHeaders.INSTANCE
+
+        internal lateinit var requestId: String
+        internal lateinit var msgData: ByteBuf
+
+        private lateinit var continuation: CancellableContinuation<ByteBuf>
+
+        suspend fun awaitResponse(): ByteBuf = suspendCancellableCoroutine { cont ->
+            continuation = cont
+            cont.invokeOnCancellation {
+                if (requests.remove(requestId, this@ResolveRequest)) {
+                    if (::msgData.isInitialized) {
+                        msgData.release()
+                        msgData = Unpooled.EMPTY_BUFFER
+                    }
+                }
+            }
+        }
+
+        fun renderQR(): BitMatrix = Companion.renderQR(serverPort, requestId)
+    }
+
+    fun newRawRequest(
+        initialReqId: String? = null,
+        additionalHeaders: HttpHeaders = EmptyHttpHeaders.INSTANCE,
+        dataBuilder: (ByteBufAllocator) -> ByteBuf
+    ): ResolveRequest {
+        val request = ResolveRequest()
+        var id: String = initialReqId ?: generateNewRequestId()
+        val msgData = dataBuilder(serverChannel.alloc())
+
+        do {
+            if (requests.putIfAbsent(id, request) == null) break
+
+            id = generateNewRequestId()
+        } while (true)
+
+        request.requestId = id
+        request.additionalHeaders = additionalHeaders
+        request.msgData = msgData
+        return request
+    }
+
+    fun newRequest(msg: JsonElement, initialReqId: String? = null): ResolveRequest {
+        val request = ResolveRequest()
+        var id: String = initialReqId ?: generateNewRequestId()
+
+        do {
+            if (requests.putIfAbsent(id, request) == null) break
+
+            id = generateNewRequestId()
+        } while (true)
+
+        request.requestId = id
+
+        val reqMsgData = serverChannel.alloc().buffer(256)
+
+        JsonWriter(OutputStreamWriter(ByteBufOutputStream(reqMsgData))).use { jwriter ->
+            jwriter.beginObject()
+                .name("reqid").value(id)
+                .name("rspuri").value("/request/complete/$id")
+                .name("create-time").value(System.currentTimeMillis())
+                .name("data")
+
+            Streams.write(msg, jwriter)
