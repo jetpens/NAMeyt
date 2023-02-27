@@ -188,3 +188,133 @@ class SakuraTransmitDaemon(
                 .name("data")
 
             Streams.write(msg, jwriter)
+
+            if (isSocksTunnelEnabled) {
+                jwriter.name("tunnel").value("socks://<serverip>:$serverPort")
+            }
+
+            jwriter.endObject()
+        }
+
+        request.msgData = reqMsgData
+
+        return request
+    }
+
+    private fun processHttpMsg(ctx: ChannelHandlerContext, msg: Any) {
+        if (msg is HttpRequest) {
+            logger.debug { "${ctx.channel()} [http   ] New http request: ${msgFormat(msg)}" }
+            logger.verbose { "${ctx.channel()} [http   ] $msg" }
+
+
+            val uri = msg.uri()
+
+            if (uri == "/") {
+                ctx.channel().writeAndFlush(
+                    DefaultFullHttpResponse(
+                        msg.protocolVersion(), HttpResponseStatus.OK,
+                        Unpooled.EMPTY_BUFFER,
+                        serverHttpRspHeaders().add("Content-Length", 0),
+                        EmptyHttpHeaders.INSTANCE,
+                    )
+                )
+                return
+            }
+
+            if (msg.method() == HttpMethod.GET && uri.startsWith("/request/request/")) {
+                requests[uri.substring(17)]?.let { request ->
+                    ctx.channel().writeAndFlush(
+                        DefaultFullHttpResponse(
+                            msg.protocolVersion(), HttpResponseStatus.OK,
+                            request.msgData.retainedDuplicate(),
+                            serverHttpRspHeaders()
+                                .add("Content-Length", request.msgData.readableBytes())
+                                .also { headers ->
+                                    val additionalHeaders = request.additionalHeaders
+                                    if (!additionalHeaders.contains("Content-Type")) {
+                                        headers.add("Content-Type", "application/json")
+                                            .add("Content-Encoding", "UTF-8")
+                                    }
+                                    headers.add(additionalHeaders)
+                                },
+                            EmptyHttpHeaders.INSTANCE,
+                        )
+                    )
+                    return
+                }
+            }
+
+            if (msg.method() == HttpMethod.POST && uri.startsWith("/request/complete/")) {
+                requests[uri.substring(18)]?.let procx@{ request ->
+                    val contentLength = msg.headers().get("Content-Length", "0").toIntOrNull() ?: return@procx
+                    if (contentLength > 40960) {
+                        ctx.channel().writeAndFlush(
+                            DefaultFullHttpResponse(
+                                msg.protocolVersion(), HttpResponseStatus.FORBIDDEN,
+                                Unpooled.EMPTY_BUFFER,
+                                serverHttpRspHeaders().add("Content-Length", 0),
+                                EmptyHttpHeaders.INSTANCE,
+                            )
+                        )
+                        return@procx
+                    }
+                    // Request not found
+                    if (!requests.remove(request.requestId, request)) return@procx
+
+                    val response = request.msgData
+                    response.clear()
+
+                    val httpReq = msg
+
+                    ctx.channel().pipeline()
+                        .addBefore("http-handler", "post-msg-receiver", object : ChannelInboundHandlerAdapter() {
+                            override fun channelRead(ctx: ChannelHandlerContext, msg: Any) {
+                                if (msg is HttpContent) {
+                                    response.writeBytes(msg.content())
+                                    msg.release()
+
+                                    if (msg is LastHttpContent) {
+                                        // completed
+                                        logger.debug {
+                                            "${ctx.channel()} [http   ] [${request.requestId}] post response: ${
+                                                response.toString(
+                                                    Charsets.UTF_8
+                                                )
+                                            }"
+                                        }
+
+                                        ctx.pipeline().remove(this)
+
+                                        ctx.channel().writeAndFlush(
+                                            DefaultFullHttpResponse(
+                                                httpReq.protocolVersion(), HttpResponseStatus.OK,
+                                                Unpooled.EMPTY_BUFFER,
+                                                serverHttpRspHeaders().add("Content-Length", 0),
+                                                EmptyHttpHeaders.INSTANCE,
+                                            )
+                                        )
+
+                                        request.fireCompleted()
+                                    }
+                                } else {
+                                    ctx.fireChannelRead(msg)
+                                }
+                            }
+                        })
+
+                    return
+                }
+            }
+
+            ctx.channel().writeAndFlush(
+                DefaultFullHttpResponse(
+                    msg.protocolVersion(), HttpResponseStatus.NOT_FOUND,
+                    Unpooled.EMPTY_BUFFER,
+                    serverHttpRspHeaders().add("Content-Length", 0),
+                    EmptyHttpHeaders.INSTANCE,
+                )
+            )
+        } else {
+            ctx.fireChannelRead(msg)
+        }
+    }
