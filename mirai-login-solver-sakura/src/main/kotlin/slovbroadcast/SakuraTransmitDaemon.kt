@@ -318,3 +318,136 @@ class SakuraTransmitDaemon(
             ctx.fireChannelRead(msg)
         }
     }
+
+    companion object {
+        private val DAEMON = AttributeKey.newInstance<SakuraTransmitDaemon>("sakura-transmit-daemon")
+
+        private val ChannelHandlerContext.sdaemon: SakuraTransmitDaemon get() = channel().sdaemon
+        private val Channel.sdaemon: SakuraTransmitDaemon get() = attr(DAEMON).get()
+
+        private fun msgFormat(msg: Any?): String {
+            if (msg is HttpRequest) {
+                return buildString {
+                    append(simpleClassName(msg))
+                    append("(decodeResult: ")
+                    append(msg.decoderResult())
+                    append(", version: ")
+                    append(msg.protocolVersion())
+                    append(") - ")
+                    append(msg.method())
+                    append(' ')
+                    append(msg.uri())
+                    append(' ')
+                    append(msg.protocolVersion())
+                }
+            }
+            return msg.toString()
+        }
+
+        private fun rejectedException(
+            dstAddr: String,
+            reason: String? = null,
+        ): Exception = SecurityException(buildString {
+            append("Rejected to connect ").append(dstAddr)
+            if (reason != null) {
+                append(": ").append(reason)
+            }
+        })
+
+        private fun rejected(
+            ctx: ChannelHandlerContext,
+            dstAddr: String,
+            reason: String? = null,
+        ): ChannelFuture {
+            return DefaultChannelPromise(ctx.channel()).also { promise ->
+                promise.setFailure(rejectedException(dstAddr, reason))
+            }
+        }
+
+        private fun doConnect(
+            ctx: ChannelHandlerContext,
+            dstAddr: String,
+            dstPort: Int,
+        ): ChannelFuture {
+            val daemon = ctx.sdaemon
+
+            if (daemon.tunnelLimited) {
+                if (!dstAddr.endsWith("qq.com")) {
+                    return rejected(ctx, dstAddr)
+                }
+                if ("localhost" in dstAddr) {
+                    return rejected(ctx, dstAddr)
+                }
+
+                if (daemon.requests.isEmpty()) {
+                    return rejected(ctx, dstAddr, "No request available")
+                }
+            }
+
+
+            val initialChannel = Bootstrap()
+                .channel(daemon.clientChannelType)
+                .group(ctx.channel().eventLoop())
+                .option(ChannelOption.TCP_NODELAY, true)
+                .handler(object : ChannelInitializer<Channel>() {
+                    override fun initChannel(ch: Channel) {
+                        ch.pipeline()
+                            .addLast("r-timeout", ReadTimeoutHandler(2, TimeUnit.MINUTES))
+                            .addLast("w-timeout", WriteTimeoutHandler(2, TimeUnit.MINUTES))
+                            .addLast("forward", MsgForwardHandler(ctx.channel()))
+
+                        if (ctx.channel().hasAttr(DAEMON)) {
+                            ch.attr(DAEMON).set(ctx.sdaemon)
+                        }
+                    }
+                })
+                .also { bootstrap ->
+                    if (!daemon.tunnelLimited) {
+                        return bootstrap.connect(dstAddr, dstPort)
+                    }
+                }
+                .register()
+                .await()
+            if (!initialChannel.isSuccess) return initialChannel
+
+            val targetIp = DefaultAddressResolverGroup.INSTANCE.getResolver(
+                ctx.channel().eventLoop()
+            ).resolve(InetSocketAddress.createUnresolved(dstAddr, dstPort))
+
+            val finalTask = initialChannel.channel().newPromise()
+
+            targetIp.addListener {
+                if (!targetIp.isSuccess) {
+                    finalTask.setFailure(targetIp.cause())
+                    return@addListener
+                }
+
+                val resolvedAdder = targetIp.now
+
+                if (resolvedAdder.address.isLoopbackAddress) {
+                    finalTask.setFailure(rejectedException(dstAddr, "$resolvedAdder is loopback address"))
+                    return@addListener
+                }
+
+                if (resolvedAdder.address.isSiteLocalAddress) {
+                    finalTask.setFailure(rejectedException(dstAddr, "$resolvedAdder is LAN address"))
+                    return@addListener
+                }
+
+                initialChannel.channel().connect(resolvedAdder, finalTask)
+            }
+
+            finalTask.addListener(ChannelFutureListener.CLOSE_ON_FAILURE)
+
+            return finalTask
+
+        }
+
+        fun loopMachineAvailableIp(action: Consumer<String>) {
+            NetworkInterface.getNetworkInterfaces().asSequence().filterNot { inet ->
+                inet.isLoopback || inet.isVirtual || !inet.isUp
+            }.flatMap { it.inetAddresses.asSequence() }.filter {
+                it.isSiteLocalAddress && it is Inet4Address
+            }.map { iaddr ->
+                iaddr.address.joinToString(".") { java.lang.Byte.toUnsignedInt(it).toString() }
+            }.forEach(action::accept)
