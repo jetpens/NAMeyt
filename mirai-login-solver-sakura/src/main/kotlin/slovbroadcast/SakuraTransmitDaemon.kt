@@ -555,3 +555,116 @@ class SakuraTransmitDaemon(
         override fun channelRead(ctx: ChannelHandlerContext, msg: Any) {
             if (msg is ByteBuf) {
                 if (msg.isReadable(2)) {
+                    val daemon = ctx.sdaemon
+
+                    when (msg.getByte(0).toInt() and 0xFF) {
+                        5 -> {
+                            daemon.logger.debug { "${ctx.channel()} [initial] Preparing as socks5" }
+
+                            ctx.channel().pipeline()
+                                .addLast("socks-5-init-request", Socks5InitialRequestDecoder())
+                                .addLast("socks-5-server-encoder", Socks5ServerEncoder.DEFAULT)
+                        }
+
+                        4 -> {
+                            daemon.logger.debug { "${ctx.channel()} [initial] Preparing as socks4" }
+
+                            ctx.channel().pipeline()
+                                .addLast("socks-4-server-decoder", Socks4ServerDecoder())
+                                .addLast("socks-4-server-encoder", Socks4ServerEncoder.INSTANCE)
+                        }
+
+                        else -> {
+                            daemon.logger.debug { "${ctx.channel()} [initial] Preparing as HTTPd" }
+
+                            ctx.channel().pipeline()
+                                .addLast("http-req-decoder", HttpRequestDecoder())
+                                .addLast("http-rsp-encoder", HttpResponseEncoder())
+                        }
+                    }
+
+                    ctx.fireChannelActive()
+
+                    ctx.pipeline().remove(ctx.handler())
+                    ctx.pipeline().addLast("2nd-pst-recv", SndPstRecv())
+
+                    ctx.channel().pipeline().fireChannelRead(msg)
+                    return
+                }
+            }
+            super.channelRead(ctx, msg)
+        }
+    }
+
+    private class SndPstRecv : ChannelInboundHandlerAdapter() {
+
+        override fun channelRead(ctx: ChannelHandlerContext, msg: Any) {
+            val daemon = ctx.sdaemon
+
+            daemon.logger.debug { "${ctx.channel()} [2 init ] Processing first packet: ${msgFormat(msg)}" }
+
+            if (msg is Socks5InitialRequest) {
+                if (msg.decoderResult().isFailure) {
+                    ctx.close()
+                    return
+                }
+                if (msg.version() != SocksVersion.SOCKS5) {
+                    ctx.close()
+                    return
+                }
+                ctx.pipeline().replace(
+                    Socks5InitialRequestDecoder::class.java,
+                    "socks5-cmd-decoder",
+                    Socks5CommandRequestDecoder()
+                )
+                daemon.logger.debug { "${ctx.channel()} [initial] switch to socks5 protocol" }
+
+                // TODO: Auth
+                ctx.pipeline().replace(this, "socks5-request-cmd-handler", Socks5CmdHandler())
+                ctx.writeAndFlush(DefaultSocks5InitialResponse(Socks5AuthMethod.NO_AUTH))
+                    .addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE)
+
+                return
+            }
+            if (msg is Socks4CommandRequest) {
+                daemon.logger.debug { "${ctx.channel()} [initial] switch to socks4 protocol" }
+
+                if (msg.type() != Socks4CommandType.CONNECT) {
+                    daemon.logger.debug { "${ctx.channel()} [socks 4] Disconnected because command isn't CONNECT" }
+
+                    ctx.channel().close()
+                    return
+                }
+
+                ctx.pipeline().remove(this)
+
+                doConnect(ctx, msg.dstAddr(), msg.dstPort()).addListener { cRsp ->
+                    cRsp as ChannelFuture
+
+                    daemon.logger.debug { "${ctx.channel()} [socks 4] TCP Tunnel status: $cRsp" }
+
+
+                    if (cRsp.isSuccess) {
+                        ctx.writeAndFlush(DefaultSocks4CommandResponse(Socks4CommandStatus.SUCCESS))
+                        ctx.pipeline().addFirst("forward", MsgForwardHandler(cRsp.channel()))
+                    } else {
+                        ctx.writeAndFlush(DefaultSocks4CommandResponse(Socks4CommandStatus.REJECTED_OR_FAILED))
+                            .addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE)
+                        ctx.channel().close()
+                    }
+                }
+
+                return
+            }
+            if (msg is HttpRequest) {
+                daemon.logger.debug { "${ctx.channel()} [initial] switch to http protocol" }
+
+                ctx.pipeline().replace(this, "http-handler", HttpConnectHandler())
+                ctx.pipeline().fireChannelRead(msg)
+                return
+            }
+            super.channelRead(ctx, msg)
+        }
+    }
+
+    private class Socks5CmdHandler : ChannelInboundHandlerAdapter() {
