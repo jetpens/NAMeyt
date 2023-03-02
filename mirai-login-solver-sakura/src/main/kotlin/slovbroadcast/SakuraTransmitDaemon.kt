@@ -451,3 +451,107 @@ class SakuraTransmitDaemon(
             }.map { iaddr ->
                 iaddr.address.joinToString(".") { java.lang.Byte.toUnsignedInt(it).toString() }
             }.forEach(action::accept)
+        }
+
+        fun renderQRInfo(port: Int, reqId: String): String {
+            val buf = StringWriter()
+            JsonWriter(buf).use { jw ->
+                jw.beginObject()
+
+                jw.name("port").value(port)
+
+                jw.name("server").beginArray()
+                loopMachineAvailableIp(jw::value)
+                jw.endArray()
+
+                jw.name("id").value(reqId)
+
+                jw.endObject()
+            }
+            return buf.toString()
+        }
+
+        fun renderQR(port: Int, reqId: String): BitMatrix = renderQRCode(renderQRInfo(port, reqId))
+
+        fun renderQRCode(
+            text: String,
+            width: Int = 400, height: Int = 400,
+            ec: ErrorCorrectionLevel = ErrorCorrectionLevel.H,
+        ): BitMatrix {
+            return QRCodeWriter().encode(
+                text, BarcodeFormat.QR_CODE, width, height, mapOf(
+                    EncodeHintType.ERROR_CORRECTION to ec
+                )
+            )
+        }
+
+        private fun simpleClassName(o: Any?): String {
+            return if (o == null) {
+                "null_object"
+            } else {
+                simpleClassName(o.javaClass)
+            }
+        }
+
+        /**
+         * Generates a simplified name from a [Class].  Similar to [Class.getSimpleName], but it works fine
+         * with anonymous classes.
+         */
+        private fun simpleClassName(clazz: Class<*>): String {
+            val className = clazz.name
+            val lastDotIdx = className.lastIndexOf('.')
+            return if (lastDotIdx > -1) {
+                className.substring(lastDotIdx + 1)
+            } else className
+        }
+    }
+
+    private fun serverHttpRspHeaders() = DefaultHttpHeaders()
+        .add("Server", "netty/1.1.4.5.1.4")
+        .add("Cache-Control", "private, no-cache, no-store, proxy-revalidate, no-transform")
+        .add("Connection", "keep-alive")
+
+    private fun generateNewRequestId(): String = buildString {
+        repeat(8) {
+            append(('0'..'9').random(random))
+        }
+    }
+
+    @Suppress("OVERRIDE_DEPRECATION", "DEPRECATION")
+    private class MsgForwardHandler(
+        private val target: Channel,
+    ) : ChannelInboundHandlerAdapter() {
+        override fun channelActive(ctx: ChannelHandlerContext) {
+            super.channelActive(ctx)
+            if (!target.isActive || !target.isOpen) {
+                ctx.channel().close()
+                ctx.sdaemon.logger.warning { "${ctx.channel()} -> $target [tunnel ] Failed to bind forwarding because target is inactive" }
+            } else {
+                ctx.sdaemon.logger.verbose { "${ctx.channel()} -> $target [tunnel ] Established" }
+            }
+        }
+
+        override fun channelRead(ctx: ChannelHandlerContext, msg: Any) {
+            target.writeAndFlush(msg).addListener { f ->
+                if (!f.isSuccess) exceptionCaught(ctx, f.cause())
+            }
+        }
+
+        override fun exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable?) {
+            super.exceptionCaught(ctx, cause)
+
+            ctx.sdaemon.logger.warning({ "${ctx.channel()} -> $target [tunnel ] [exceptionCaught]" }, cause)
+            ctx.channel().close()
+        }
+
+        override fun channelInactive(ctx: ChannelHandlerContext) {
+            target.close()
+
+            ctx.sdaemon.logger.verbose { "${ctx.channel()} -> $target [tunnel ] Disconnected" }
+        }
+    }
+
+    private class FstPrepareHandler : ChannelInboundHandlerAdapter() {
+        override fun channelRead(ctx: ChannelHandlerContext, msg: Any) {
+            if (msg is ByteBuf) {
+                if (msg.isReadable(2)) {
