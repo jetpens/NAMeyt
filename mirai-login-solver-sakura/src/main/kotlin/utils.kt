@@ -24,3 +24,19 @@ internal inline fun <R> ByteBuf.useByteBuf(act: (ByteBuf) -> R): R {
     retain()
     try {
         return act(this)
+    } finally {
+        release(2)
+    }
+}
+
+@Suppress("FunctionName")
+internal fun DaemonNettyNioEventLoopGroup(): NioEventLoopGroup {
+    val threadGroup = ThreadGroup("SakuraLoginSolverDaemon")
+    val counter = AtomicInteger(0)
+    val threadFactory = ThreadFactory { task ->
+        Thread(threadGroup, task, "SakuraLoginSolverDaemon #${counter.getAndIncrement()}").also { thread ->
+            thread.isDaemon = true
+        }
+    }
+    return NioEventLoopGroup(0, threadFactory)
+}
