@@ -668,3 +668,62 @@ class SakuraTransmitDaemon(
     }
 
     private class Socks5CmdHandler : ChannelInboundHandlerAdapter() {
+        override fun channelRead(ctx: ChannelHandlerContext, msg: Any) {
+            if (msg is Socks5CommandRequest) {
+                val daemon = ctx.sdaemon
+
+                daemon.logger.debug { "${ctx.channel()} [socks 5] Processing command $msg" }
+
+                if (msg.type() != Socks5CommandType.CONNECT) {
+                    daemon.logger.debug { "${ctx.channel()} [socks 5] Disconnected because command isn't CONNECT" }
+
+                    ctx.pipeline().writeAndFlush(
+                        DefaultSocks5CommandResponse(
+                            Socks5CommandStatus.FORBIDDEN, Socks5AddressType.DOMAIN
+                        )
+                    )
+                    ctx.channel().close()
+                    return
+                }
+                ctx.pipeline().remove(this)
+
+                doConnect(ctx, msg.dstAddr(), msg.dstPort()).addListener { connectRsp ->
+                    connectRsp as ChannelFuture
+
+
+                    daemon.logger.debug { "${ctx.channel()} [socks 4] TCP Tunnel status: $connectRsp" }
+
+                    if (connectRsp.isSuccess) {
+                        ctx.pipeline().writeAndFlush(
+                            DefaultSocks5CommandResponse(
+                                Socks5CommandStatus.SUCCESS, when (msg.dstAddrType()) {
+                                    Socks5AddressType.DOMAIN -> Socks5AddressType.IPv4
+                                    else -> msg.dstAddrType()
+                                }
+                            )
+                        )
+
+                        ctx.pipeline().addFirst("forward", MsgForwardHandler(connectRsp.channel()))
+                    } else {
+                        ctx.pipeline().writeAndFlush(
+                            DefaultSocks5CommandResponse(Socks5CommandStatus.FAILURE, msg.dstAddrType())
+                        ).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE)
+                        ctx.channel().close()
+                    }
+                }
+
+                return
+            }
+
+            super.channelRead(ctx, msg)
+        }
+    }
+
+    private class HttpConnectHandler : ChannelInboundHandlerAdapter() {
+        override fun channelRead(ctx: ChannelHandlerContext, msg: Any) {
+            ctx.channel().attr(DAEMON).get().processHttpMsg(ctx, msg)
+        }
+    }
+
+
+}
